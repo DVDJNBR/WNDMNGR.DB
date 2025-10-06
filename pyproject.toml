@@ -1,0 +1,13 @@
+[project]
+name = "wndmngr-db"
+version = "0.1.0"
+dependencies = [
+    "pyodbc",
+    "pandas",
+    "loguru",
+    "python-dotenv",
+    "pyjanitor",
+    "openpyxl",
+    "ipykernel",
+    "sqlmodel",
+]
