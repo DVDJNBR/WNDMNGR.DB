@@ -9,6 +9,7 @@ BEGIN
         farm_uuid NVARCHAR(36) PRIMARY KEY,
         farm_code NVARCHAR(10) NOT NULL,
         farm_status NVARCHAR(50) NOT NULL,
-        tcma_status NVARCHAR(50) NOT NULL
+        tcma_status NVARCHAR(50) NOT NULL,
+        CONSTRAINT fk_fstatus_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid)
     );
 END

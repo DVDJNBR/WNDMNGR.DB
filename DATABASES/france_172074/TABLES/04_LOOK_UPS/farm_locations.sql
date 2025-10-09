@@ -16,6 +16,7 @@ BEGIN
         arras_round_trip_distance_km DECIMAL(10,2),
         vertou_round_trip_duration_h DECIMAL(10,2),
         arras_toll_eur DECIMAL(10,2),
-        nantes_toll_eur DECIMAL(10,2)
+        nantes_toll_eur DECIMAL(10,2),
+        CONSTRAINT fk_floc_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid)
     );
 END

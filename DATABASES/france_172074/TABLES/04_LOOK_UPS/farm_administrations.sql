@@ -1,5 +1,3 @@
--- Table: farm_administrations
--- Description: Informations d'administration des fermes
 IF NOT EXISTS (
     SELECT * 
     FROM INFORMATION_SCHEMA.TABLES 
@@ -20,6 +18,7 @@ BEGIN
         financial_guarantee_amount DECIMAL(15,2) NOT NULL,
         financial_guarantee_date DATE NOT NULL,
         land_lease_payment_date DATE NOT NULL,
-        windmanager_subsidiary NVARCHAR(100) NOT NULL
+        windmanager_subsidiary NVARCHAR(100) NOT NULL,
+        CONSTRAINT fk_fadmin_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid)
     );
 END

@@ -12,6 +12,7 @@ BEGIN
         signature_date DATE NOT NULL,
         effective_date DATE NOT NULL,
         end_date DATE NOT NULL,
-        compensation_rate DECIMAL(10,2) NOT NULL
+        compensation_rate DECIMAL(10,2) NOT NULL,
+        CONSTRAINT fk_tcma_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid)
     );
 END

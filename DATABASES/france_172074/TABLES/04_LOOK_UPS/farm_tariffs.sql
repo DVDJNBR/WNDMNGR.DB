@@ -22,6 +22,7 @@ BEGIN
         vppa_start_date DATE,
         vppa_duration INT,
         quantity DECIMAL(10,2),
-        vppa_tariff_per_mwh DECIMAL(10,2)
+        vppa_tariff_per_mwh DECIMAL(10,2),
+        CONSTRAINT fk_ftariffs_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid)
     );
 END

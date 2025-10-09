@@ -1,0 +1,58 @@
+Customer,Nom des Parcs Eoliens,SPV,Project,Three-letter-code,Nom du PDL,Grid operator,PDL Service company,Coordonnées GPS,Communes ( Departements)
+STATKRAFT Renouvelables,Lanrivoaré,EOLIENNES SUROIT SNC,Lanrivoaré,LAN,P15 Pervezen à Lanrivoare,ENEDIS,Dourmap,https://goo.gl/maps/k8DXH3LjfpFfLvw76,Lanrivoaré (Bretagne)
+STATKRAFT Renouvelables,Méligny le Grand (MLG),EOLIENNES SUROIT SNC,Méligny-le-Grand,MLG,EOL MELIGNY,ENEDIS,INEO,https://goo.gl/maps/jLnk9P6DhaN2,Méligny le Grand (Meuse)
+STATKRAFT Renouvelables,Ménil la Horgne (MLH),EOLIENNES SUROIT SNC,Ménil-la-Horgne,MLH,PDL MENIL,ENEDIS,INEO,https://goo.gl/maps/kvjmPg8S4MN2,"Ménil la Horgne, Saulvaux (Meuse)"
+STATKRAFT Renouvelables,Roudouallec,EOLIENNES SUROIT SNC,Roudouallec,ROU,Eolien ABOWIND,ENEDIS,Dourmap,https://goo.gl/maps/aPPPtommuRWUfM6f8,Roudouallec (Bretagne)
+Lanea,Energie 02,ENERGIE 02,Dizy/ Obi,E02,CARREAU MANCEAU 4,ENEDIS,INEO,https://goo.gl/maps/RKUGPTYRs7y,Dizy-le-Gros (Aisne)
+Lanea,Energie 06,ENERGIE 06,Saisseval,E06,VALLEE MADAME,ENEDIS,INEO,https://goo.gl/maps/C9xH6NWYJHB2,Saisseval 80540 (Somme)
+Lanea,Energie 21 Poitou Charentes (MLHCP),ENERGIE 21 POITOU-CHARENTES,MLHCP,EPC,MLHCP NORD,GEREDIS ,INEO,https://goo.gl/maps/kKMQ2XzEgrm,"Melleran, Lorigné, Hanc, La Chapelle-Pouilloux (Deux Sèvres)"
+Lanea,Energie 21 Poitou Charentes (MLHCP),ENERGIE 21 POITOU-CHARENTES,MLHCP,EPC,MLHCP SUD,ENEDIS,INEO,https://goo.gl/maps/kKMQ2XzEgrm,"Melleran, Lorigné, Hanc, La Chapelle-Pouilloux (Deux Sèvres)"
+Lanea,Energie Blanc Mont,ENERGIE DU BLANC MONT,Blanc Mont,EBM,LA GARENNES,ENEDIS,INEO,https://goo.gl/maps/kobYT3ZcSj72,La Malmaison (Aisne)
+Lanea,Energie Dizy,ENERGIE DIZY,Dizy,EDI,CARREAU MANCEAU 5,ENEDIS,INEO,https://goo.gl/maps/neRWBmBfit82,Dizy-le-Gros (Aisne)
+Lanea,Energie les Trente,ENERGIE LES TRENTE,Les Trente,ELT,LES TRENTE 60011P1069,ENEDIS,INEO,https://goo.gl/maps/XJ6bELGLmDn,"Le fond de Gronde, proche de Amy 60310 (Oise)"
+Lanea,Energie Montagne Gaillard,ENERGIE MONTAGNE GAILLARD,Montagne Gaillard,EMG,Montagne Gaillard PDL 1 OUEST,SICAE,INEO,https://goo.gl/maps/W4KcfVogAwy,"Epehy, Villers-Faucon (Somme)"
+Lanea,Energie Montagne Gaillard,ENERGIE MONTAGNE GAILLARD,Montagne Gaillard,EMG,Montagne Gaillard PDL 2 EST,SICAE,INEO,https://goo.gl/maps/W4KcfVogAwy,"Epehy, Villers-Faucon (Somme)"
+Lanea,Energie Obi,ENERGIE DE L'OBI,Parc M (Obi),EOB,CARREAU MANCEAU 3,ENEDIS,INEO,https://goo.gl/maps/neRWBmBfit82,Dizy-le-Gros (Aisne)
+Lanea,Mont d'Ergny,SEPE DU MONT D ERGNY,Mont d'Ergny,SME,CAMPAGNE-LES-BOULONNAIS,ENEDIS,Enercon,https://goo.gl/maps/fM2p9N4ANwuXNkXM9,Bourthes (Pas-de-Calais)
+wpd,Château-Garnier,Energie Château Garnier,Château Garnier,ECG,Château Garnier PDL,SRD,,https://maps.app.goo.gl/6yVv8a2GBjyVPNZL9,
+wpd,Chouy,Eoliennes Chouy,Chouy (wpd Energie 21 SE n°16),E21,Chouy PDL,ENEDIS,INEO,https://goo.gl/maps/tikJmDpH4R9HzDDy9,
+wpd,Dechy,Energie 08 SAS,Dechy,E08,Dechy PDL,ENEDIS,,https://maps.app.goo.gl/jSb4ETTwWDg9kkQM6,
+wpd,Energie 03,ENERGIE 03,Champcourt,E03,LE MAZURIER,ENEDIS ,INEO,https://goo.gl/maps/8YfGg8BCdnbG9hEH6,Châtillon-lès-sons (Aisne)
+wpd,Energie 03,ENERGIE 03,Champcourt,E03,LE FOSSE,ENEDIS ,INEO,https://goo.gl/maps/rNfsGUgsh36sTNgS9,
+wpd,Energie 05,Energie 05 SAS,Pays de Mayenne,E05,LA PILLERIE,ENEDIS,INEO,https://goo.gl/maps/mPiwkvQhBrgrMWJf8,La Haie-Traversaine
+wpd,Energie Boule Bleue,ENERGIE BOULE BLEUE,Boule Bleue,EBB,LA BOULE BLEUE,SICAE,INEO,https://goo.gl/maps/yVfAvGktQAn,"Marquaix, Tincourt-Boucly, Longavesnes, Roisel (Somme)"
+wpd,Energie Iwuy,ENERGIE IWUY,Iwuy,EIW,BERNAV,ENEDIS ,INEO,https://goo.gl/maps/K67FnjT4BSbTzL3y6,Iwuy (Nord)
+wpd,Energie Iwuy,ENERGIE IWUY,Iwuy,EIW,FRETES,ENEDIS ,INEO,https://goo.gl/maps/K67FnjT4BSbTzL3y6,Iwuy (Nord)
+wpd,Energie Quincy,ENERGIE QUINCY,Quincy,ENQ,Eole 87,ENEDIS ,INEO,https://goo.gl/maps/Awwxm86XWZL2,Quincy le vicomte (Côte-d'Or )
+wpd,Energie Ronchères,ENERGIE DES RONCHERES,Ronchères,EDR,Energie des Ronchères PDL 1,ENEDIS,INEO,https://goo.gl/maps/5eYMiocnw7ZBgB5f8,Housset (Aisne)
+wpd,Energie Ronchères,ENERGIE DES RONCHERES,Ronchères,EDR,LE RIBOULIS,ENEDIS,INEO,https://goo.gl/maps/5eYMiocnw7ZBgB5f8,Housset (Aisne)
+wpd,Energie Ronchères,ENERGIE DES RONCHERES,Ronchères,EDR,Energie des Ronchères PDL 3,ENEDIS,INEO,https://goo.gl/maps/5eYMiocnw7ZBgB5f8,Housset (Aisne)
+wpd,Energie Tigné,ENERGIE TIGNE,Tigné,ETI,Eolien Tigné,ENEDIS ,INEO,https://goo.gl/maps/WmHiGuthsj92,Tigné (Maine et Loire)
+wpd,Energie Tiper Eolien,Energie Tiper Eolien,TIPER Éolien,ENT,HTA Prod les Douaires,GEREDIS ,INEO,https://goo.gl/maps/iZgUnD4Vm7M2,"Louzy, Saint-Léger-de-Montbrun et Thouars (Deux Sèvres)"
+wpd,Energie Touvent (Mont du Saule),ENERGIE DU TOUVENT,Mont du Saule,EDT,HTA PE SAULE,ENEDIS ,INEO,https://goo.gl/maps/35uubv2nuZ52,Hardanges (Mayenne)
+wpd,Energie Vendée,ENERGIE VENDEE,Auzay,EVE,EOL_PlaineAuzay1,ENEDIS,INEO,https://goo.gl/maps/R8Pp14VRws7Ri2Qv9,Auchay sur Vendée (Vendée)
+wpd,Energie Vendée,ENERGIE VENDEE,Auzay,EVE,EOL_PlaineAuzay2,ENEDIS,INEO,https://goo.gl/maps/R8Pp14VRws7Ri2Qv9,Auchay sur Vendée (Vendée)
+wpd,Energie Vendée,ENERGIE VENDEE,Auzay,EVE,EOL_PlaineAuzay3,ENEDIS,INEO,https://goo.gl/maps/NhKcxZkYqu4BJzxD9,Auchay sur Vendée (Vendée)
+wpd,Eoliennes de L'Ormeau,EOLIENNES DE L'ORMEAU,Ormeau,EDO,Quincy le Vicomte,ENEDIS ,INEO,https://goo.gl/maps/7sMuzi4WH5m,Quincy le vicomte (Côte-d'Or )
+wpd,Herbes Sauvages,Energie du Confolentais,Herbes Sauvages,ECO,16054P0022 herbe sauvage,ENEDIS,INEO,https://goo.gl/maps/pFz9Qa66DoBU16Zy7,Le Bouchage (Nouvelle-Aquitaine)
+wpd,Limalonges,Energie Limalonges,Limalonges,WFLI,HTA P0064,SRD,INEO,https://goo.gl/maps/urJxpp52xEP4zD3g9,Limalonges (Deux Sèvres)
+wpd,Magnac-Laval PDL 1,Energie Haute Vienne SAS,Magnac-Laval,EHV,Magnac-Laval PDL 1,ENEDIS,INEO,https://goo.gl/maps/8TfyssCwFKYSFD5x5,
+wpd,Magnac-Laval PDL 2,Energie Haute Vienne SAS,Magnac-Laval,EHV,Magnac-Laval PDL 2,ENEDIS,INEO,https://goo.gl/maps/F34CyByY41MNERve8,
+wpd,Marnières,Energie des Poiriers SAS,Les Marnières,EPO,Marnières,ENEDIS ,INEO,https://goo.gl/maps/mRXR6VycnUqnpYJK7,
+wpd,Moulismes,Energie Moulismes SAS,Moulismes,EMS,PDL Moulismes,SRD,,https://maps.app.goo.gl/nAJAvjgwAPUhQNWq6,
+wpd,Peyrusse,Energie 21 Auvergne,Peyrusse (wpd Energie 21 Auvergne ),EAV,Peyrusse PDL 1,,,https://goo.gl/maps/FEudRUrRWcQubzok7,(Cantal)
+wpd,Peyrusse,Energie 21 Auvergne,Peyrusse (wpd Energie 21 Auvergne ),EAV,Peyrusse PDL 2,,,,(Cantal)
+wpd,PPK PDL 1,Energie des Noyers SAS,Petit Doré PPK,EDN,PPK PDL 1,ENEDIS,INEO,https://goo.gl/maps/NfRoQUuh4R4rFruq9,
+wpd,PPK PDL4,Energie des Noyers SAS,Petit Doré PPK,EDN,PPK PDL4,ENEDIS,INEO,https://maps.app.goo.gl/SBj1SDQFresDn4rx7,
+wpd,Saint Laurs,Energie Deux Sèvres SAS,Saint Laurs (Energie Deux Sèvres),EDS,Saint Laurs PDL,GEREDIS ,INEO,https://maps.app.goo.gl/gMa6rUzyGB9wRNv5A,Saint Laurs
+wpd,Saulzoir,Energie Saulzoir SAS,Saulzoir,ESA,PE DES SAULES,ENEDIS,INEO,https://maps.app.goo.gl/EzmV8TJxnbTSq4Xv9,
+wpd,WPD II Poitou Charentes (Clussais),WPD II POITOU CHARENTES,Clussais la Pommeraie,WPC,HTA Prod les Chebreaux,GEREDIS ,INEO,https://goo.gl/maps/xsUNRwa23js,Clussais la Pommeraie (Deux Sèvres)
+wpd Invest,Bouresse Energies,BOURESSE ENERGIES,Bouresse ,BRS,P0045,SRD,INEO,https://goo.gl/maps/M17dfe1orsAhq9mn9,Bouresse (Vienne)
+wpd Invest,Chauvé Energies,CHAUVE ENERGIES,Chauvé ,CEN,EOLIEN CHAUVE,ENEDIS,INEO,https://goo.gl/maps/yrZVcanc25nUkXah7,Chauvé (Loire Atlantique)
+wpd Invest,Energies Bocage,ENERGIES BOCAGE,Bocage,BOG,EOL ST CHRISTOPHE,ENEDIS,INEO,https://goo.gl/maps/fFKcMYAxEdLCbgMSA,Saint-Christophe-du-Bois (Maine-et-Loire)
+wpd Invest,Energies des Forières,ENERGIES DES FORIERES,Forières,FOI,Eole Forières 1,ENEDIS,Enercon,https://goo.gl/maps/59znjyWFAGC8RUaM9,Criel-sur-Mer (Seine-Maritime)
+wpd Invest,Energies des Hauts-Traits,ENERGIES DES HAUTS TRAITS,Hauts Traits,HAT,EOLE GOUCHAUPRE,ENEDIS,INEO,https://goo.gl/maps/62gv77zSyvdxsbdi9,Gouchaupre (Seine-Maritime)
+wpd Invest,Energies des Longs Champs,ENERGIES DES LONGS CHAMPS,Longs-Champs,LCH,LES CAVEES,ENEDIS,Enercon,https://goo.gl/maps/BhsN2CkadYN4Kyyc9,Le Bourg-Dun (Seine-Maritime)
+wpd Invest,Energies du Petit Caux,ENERGIES DU PETIT CAUX,Petit-Caux,PEC,Petit Caux,ENEDIS,INEO,https://goo.gl/maps/HbE7SKsLgrWf4mKd8,Petit Caux (Seine-Maritime)
+wpd Invest,Eoliennes de Fréligné,EOLIENNES DE FRELIGNE,Fréligné ,FRG,EOL FRELIGNE,ENEDIS,INEO,https://goo.gl/maps/hHUWEg9Qq2DPYW6S6,Touvois (Loire-Atlantique)
+wpd Invest,Usson Energies,USSON ENERGIES,Usson,USO,P0046,SRD,INEO,https://goo.gl/maps/M17dfe1orsAhq9mn9,
