@@ -4,6 +4,8 @@ import pandas as pd
 import re
 from loguru import logger
 
+import icecream as ic
+
 # Paths
 bronze_dir = Path('DATABASES') / 'france_172074' / 'BRONZE'
 silver_dir = Path('DATABASES') / 'france_172074' / 'SILVER'
@@ -16,7 +18,9 @@ silver_dir.mkdir(parents=True, exist_ok=True)
 logger.info("Starting to clean Database sheet...")
 df_database = (
     pd.read_csv(bronze_dir / "database_sheet.csv")  # type: ignore
+    .rename(columns=lambda x: x.strip())  
     .clean_names(case_type="snake", strip_accents=True) 
+    .rename(columns=lambda x: x.strip('_').replace('\n', '')) # remove leading/trailing underscores and newlines in col names
     .rename({"end_date_of_o&m_contract":"end_date_of_om_contract"}, axis=1)
     .fillna("") 
     .map(lambda x: re.sub(r'\s+', ' ', x) if isinstance(x, str) else x)
@@ -51,18 +55,18 @@ df_database.dismantling_provision_indexation_date = pd.to_numeric(df_database.di
 # floats
 df_database.km_ar_arras = pd.to_numeric(df_database.km_ar_arras, errors='coerce').astype('Float64')
 df_database.km_ar_nantes = pd.to_numeric(df_database.km_ar_nantes, errors='coerce').astype('Float64')
-df_database.temps_ar_arras_en_h_ = pd.to_numeric(df_database.temps_ar_arras_en_h_, errors='coerce').astype('Float64')
-df_database.temps_ar_vertou_en_h_ = pd.to_numeric(df_database.temps_ar_vertou_en_h_, errors='coerce').astype('Float64')
+df_database.temps_ar_arras_en_h = pd.to_numeric(df_database.temps_ar_arras_en_h, errors='coerce').astype('Float64')
+df_database.temps_ar_vertou_en_h = pd.to_numeric(df_database.temps_ar_vertou_en_h, errors='coerce').astype('Float64')
 df_database.peages_arras = pd.to_numeric(df_database.peages_arras, errors='coerce').astype('Float64')
 df_database.peages_nantes = pd.to_numeric(df_database.peages_nantes, errors='coerce').astype('Float64')
 df_database.tcma_compensation_rate = pd.to_numeric(df_database.tcma_compensation_rate, errors='coerce').astype('Float64')
 df_database.financial_guarantee_amount = pd.to_numeric(df_database.financial_guarantee_amount, errors='coerce').astype('Float64')
-df_database.vppa_tariff_mwh = pd.to_numeric(df_database.vppa_tariff_mwh, errors='coerce').astype('Float64')
-df_database.production_target_bank_mwh_an_ = pd.to_numeric(df_database.production_target_bank_mwh_an_, errors='coerce').astype('Float64')
-df_database.productible_actual_2020_mwh_ = pd.to_numeric(df_database.productible_actual_2020_mwh_, errors='coerce').astype('Float64')
-df_database.productible_actual_2021_mwh_ = pd.to_numeric(df_database.productible_actual_2021_mwh_, errors='coerce').astype('Float64')
-df_database.productible_actual_2022_mwh_ = pd.to_numeric(df_database.productible_actual_2022_mwh_, errors='coerce').astype('Float64')
-df_database.productible_actual_2023_mwh_ = pd.to_numeric(df_database.productible_actual_2023_mwh_, errors='coerce').astype('Float64')
+df_database.vppa_tariff_m_wh = pd.to_numeric(df_database.vppa_tariff_m_wh, errors='coerce').astype('Float64')
+df_database.production_target_bank_m_wh_an = pd.to_numeric(df_database.production_target_bank_m_wh_an, errors='coerce').astype('Float64')
+df_database.productible_actual_2020_m_wh = pd.to_numeric(df_database.productible_actual_2020_m_wh, errors='coerce').astype('Float64')
+df_database.productible_actual_2021_m_wh = pd.to_numeric(df_database.productible_actual_2021_m_wh, errors='coerce').astype('Float64')
+df_database.productible_actual_2022_m_wh = pd.to_numeric(df_database.productible_actual_2022_m_wh, errors='coerce').astype('Float64')
+df_database.productible_actual_2023_m_wh = pd.to_numeric(df_database.productible_actual_2023_m_wh, errors='coerce').astype('Float64')
 df_database.revenue_target_2020 = pd.to_numeric(df_database.revenue_target_2020, errors='coerce').astype('Float64')
 df_database.revenue_target_2021 = pd.to_numeric(df_database.revenue_target_2021, errors='coerce').astype('Float64')
 df_database.revenue_target_2022 = pd.to_numeric(df_database.revenue_target_2022, errors='coerce').astype('Float64')
@@ -125,4 +129,4 @@ df_dbgrid = (
 df_dbgrid.to_csv(silver_dir / "dbgrid_sheet.csv", index=False)
 logger.success("DB GRID sheet cleaned and saved to SILVER")
 
-logger.success("✅ All sheets cleaned and saved to SILVER layer")
+logger.success("All sheets cleaned and saved to SILVER layer")

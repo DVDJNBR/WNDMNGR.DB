@@ -1,0 +1,231 @@
+three_letter_code,spv,project,wf_name_in_rotorsoft,wtg_serial_number,num_wtg,cod,wtg_type,wtg_version,manufacturer,hub_height_[m],rotor_diameter_[m],tip_height_m_,rated_power_[mw]
+BOG,Energies Bocage,Bocage,Énergies Bocage (FRA),38712,,,V90,,Vestas,80.0,90,125.0,2.0
+BOG,Energies Bocage,Bocage,Énergies Bocage (FRA),38713,,,V90,,Vestas,80.0,90,125.0,2.0
+BOG,Energies Bocage,Bocage,Énergies Bocage (FRA),38711,,,V90,,Vestas,80.0,90,125.0,2.0
+BOG,Energies Bocage,Bocage,Énergies Bocage (FRA),38714,,,V90,,Vestas,80.0,90,125.0,2.0
+BRS,Bouresse Energies,Bouresse ,Bouresse Energies (FRA),215372,,,V100,,Vestas,100.0,100,150.0,2.0
+BRS,Bouresse Energies,Bouresse ,Bouresse Energies (FRA),215373,,,V100,,Vestas,100.0,100,150.0,2.0
+BRS,Bouresse Energies,Bouresse ,Bouresse Energies (FRA),215374,,,V100,,Vestas,100.0,100,150.0,2.0
+BRS,Bouresse Energies,Bouresse ,Bouresse Energies (FRA),215375,,,V100,,Vestas,100.0,100,150.0,2.0
+BRS,Bouresse Energies,Bouresse ,Bouresse Energies (FRA),215376,,,V100,,Vestas,100.0,100,150.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82496,,,MM82,,Senvion,80.0,82,121.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82541,,,MM82,,Senvion,80.0,82,121.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82542,,,MM82,,Senvion,80.0,82,121.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82498,,,MM82,,Senvion,80.0,82,121.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82543,,,MM82,,Senvion,80.0,82,121.0,2.0
+CEN,Chauve Energies,Chauvé ,Chauvé Energies (FRA),82497,,,MM82,,Senvion,80.0,82,121.0,2.0
+E02,Energie 02,Dizy/ Obi,Énergie 02 (FRA),921525,WTG 19,2019-02-27,E92,,Enercon,85.0,92,131.0,2.35
+E02,Energie 02,Dizy/ Obi,Énergie 02 (FRA),921524,WTG 20,2018-12-28,E92,,Enercon,85.0,92,131.0,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030219,,2019-12-09,E103,,Enercon,98.0,103,149.5,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030224,,2019-09-30,E103,,Enercon,98.0,103,149.5,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030223,,2019-09-30,E103,,Enercon,98.0,103,149.5,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030222,,2019-09-30,E103,,Enercon,98.0,103,149.5,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030221,,2019-09-30,E103,,Enercon,98.0,103,149.5,2.35
+E03,Energie 03,Champcourt,Énergie 03 (FRA),1030220,,2019-09-30,E103,,Enercon,98.0,103,149.5,2.35
+E05,Energie 05 Sas,Pays De Mayenne,Énergie 05 (FRA),90840,,,N117,,Nordex,91.5,117,150.0,3.6
+E06,Energie 06,Saisseval,Énergie 06 (FRA),826078,WTG 05,2015-07-03,E82,,Enercon,99.0,82,140.0,2.3
+E06,Energie 06,Saisseval,Énergie 06 (FRA),826077,WTG 04,2015-07-03,E82,,Enercon,99.0,82,140.0,2.3
+E06,Energie 06,Saisseval,Énergie 06 (FRA),826076,WTG 03,2015-07-03,E82,,Enercon,99.0,82,140.0,2.3
+E06,Energie 06,Saisseval,Énergie 06 (FRA),826075,WTG 02,2015-07-03,E82,,Enercon,99.0,82,140.0,2.3
+E06,Energie 06,Saisseval,Énergie 06 (FRA),826074,WTG 01,2015-07-03,E82,,Enercon,99.0,82,140.0,2.3
+E05,Energie 05 Sas,Pays De Mayenne,Énergie 05 (FRA),90841,,,N117,,Nordex,91.5,117,150.0,3.6
+E05,Energie 05 Sas,Pays De Mayenne,Énergie 05 (FRA),90842,,,N117,,Nordex,91.5,117,150.0,3.6
+E08,Energie 08 Sas,Dechy,0,252084,WTG 01,,V100,,Vestas,95.0,100,145.0,2.0
+E08,Energie 08 Sas,Dechy,0,252085,WTG 02,,V100,,Vestas,95.0,100,145.0,2.0
+E08,Energie 08 Sas,Dechy,0,252086,WTG 03,,V100,,Vestas,95.0,100,145.0,2.0
+E08,Energie 08 Sas,Dechy,0,252097,WTG 04,,V100,,Vestas,95.0,100,145.0,2.0
+E08,Energie 08 Sas,Dechy,0,252088,WTG 05,,V100,,Vestas,95.0,100,145.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243674,,,V100,,Vestas,100.0,100,150.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243675,,,V100,,Vestas,100.0,100,150.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243676,,,V100,,Vestas,100.0,100,150.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243677,,,V100,,Vestas,100.0,100,150.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243678,,,V100,,Vestas,100.0,100,150.0,2.0
+E21,Eoliennes Chouy,Chouy (Wpd Energie 21 Se N°16),Éoliennes de Chouy (FRA),243679,,,V100,,Vestas,100.0,100,150.0,2.0
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EAV,Energie 21 Auvergne,Peyrusse (Wpd Energie 21 Auvergne ),0,,,,E82,,Enercon,98.0,82,139.0,2.3
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921437,WTG 05,,E92,,Enercon,104.0,92,150.0,2.35
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921438,WTG 06,2017-12-29,E92,,Enercon,104.0,92,150.0,2.35
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921436,WTG 04,2017-12-29,E92,,Enercon,104.0,92,150.0,2.35
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921435,WTG 03,2017-12-29,E92,,Enercon,104.0,92,150.0,2.35
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921434,WTG 02,2017-12-29,E92,,Enercon,104.0,92,150.0,2.35
+EBB,Energie Boule Bleue,Boule Bleue,Énergie Boule Bleue (FRA),921433,WTG 01,2017-12-29,E92,,Enercon,104.0,92,150.0,2.35
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826795,WTG 04,2017-02-21,E82,,Enercon,98.0,82,139.0,2.3
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826797,WTG 06,2016-12-30,E82,,Enercon,98.0,82,139.0,2.3
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826796,WTG 05,2016-12-30,E82,,Enercon,98.0,82,139.0,2.3
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826794,WTG 03,2016-12-30,E82,,Enercon,98.0,82,139.0,2.3
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826793,WTG 02,2016-12-30,E82,,Enercon,98.0,82,139.0,2.3
+EBM,Energie Du Blanc Mont,Blanc Mont,Énergie du Blanc Mont (FRA),826792,WTG 01,2016-12-30,E82,,Enercon,98.0,82,139.0,2.3
+ECG,Energie Château Garnier,Château Garnier,Énergie Château-Garnier (FRA),252052,,,V136,,Vestas,112.0,136,180.0,4.2
+ECG,Energie Château Garnier,Château Garnier,Énergie Château-Garnier (FRA),252053,,,V136,,Vestas,112.0,136,180.0,4.2
+ECG,Energie Château Garnier,Château Garnier,Énergie Château-Garnier (FRA),252054,,,V136,,Vestas,112.0,136,180.0,4.2
+ECO,Energie Du Confolentais,Herbes Sauvages,Énergie du Confolentais (FRA),247466,,,V136,,Vestas,112.0,136,180.0,3.0
+ECO,Energie Du Confolentais,Herbes Sauvages,Énergie du Confolentais (FRA),247467,,,V136,,Vestas,112.0,136,180.0,3.0
+ECO,Energie Du Confolentais,Herbes Sauvages,Énergie du Confolentais (FRA),247468,,,V136,,Vestas,112.0,136,180.0,3.0
+ECO,Energie Du Confolentais,Herbes Sauvages,Énergie du Confolentais (FRA),247469,,,V136,,Vestas,112.0,136,180.0,3.0
+EDI,Energie Dizy,Dizy,Énergie Dizy (FRA),921454,WTG 17,2018-02-27,E92,,Enercon,103.0,92,149.0,2.35
+EDI,Energie Dizy,Dizy,Énergie Dizy (FRA),921279,WTG 27,2018-02-27,E92,,Enercon,103.0,92,149.0,2.35
+EDI,Energie Dizy,Dizy,Énergie Dizy (FRA),921278,WTG 26,2018-02-27,E92,,Enercon,103.0,92,149.0,2.35
+EDI,Energie Dizy,Dizy,Énergie Dizy (FRA),921277,WTG 25,2018-02-27,E92,,Enercon,103.0,92,149.0,2.35
+EDI,Energie Dizy,Dizy,Énergie Dizy (FRA),921276,WTG 23,2018-02-27,E92,,Enercon,103.0,92,149.0,2.35
+EDN,Energie Des Noyers Sas,Petit Doré Ppk,Énergie des Noyers (FRA),92810,,,N117,,Nordex,106.0,117,164.5,3.6
+EDN,Energie Des Noyers Sas,Petit Doré Ppk,Énergie des Noyers (FRA),92811,,,N117,,Nordex,106.0,117,164.5,3.6
+EDN,Energie Des Noyers Sas,Petit Doré Ppk,Énergie des Noyers (FRA),92812,,,N117,,Nordex,106.0,117,164.5,3.6
+EDN,Energie Des Noyers Sas,Petit Doré Ppk,Énergie des Noyers (FRA),92813,,,N117,,Nordex,106.0,117,164.5,3.6
+EDN,Energie Des Noyers Sas,Petit Doré Ppk,Énergie des Noyers (FRA),92814,,,N117,,Nordex,106.0,117,164.5,3.6
+EDO,Eoliennes De L'Ormeau,Ormeau,Éoliennes de l'Ormeau (FRA),224947,WTG 04,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+EDO,Eoliennes De L'Ormeau,Ormeau,Éoliennes de l'Ormeau (FRA),224946,WTG 01,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+EDO,Eoliennes De L'Ormeau,Ormeau,Éoliennes de l'Ormeau (FRA),224945,WTG 02,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+EDO,Eoliennes De L'Ormeau,Ormeau,Éoliennes de l'Ormeau (FRA),224944,WTG 01,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),232084,WTG 1,2020-12-22,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),232085,WTG 2,2020-12-22,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235326,WTG 3,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235327,WTG 4,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),232086,WTG 5,2020-12-22,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),232087,WTG 6,2020-12-22,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235328,WTG 7,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235329,WTG 8,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235330,WTG 9,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235331,WTG 10,2020-07-29,V136,,Vestas,112.0,136,180.0,3.6
+EDR,Energie Des Roncheres,Ronchères,Énergie des Ronchères (FRA),235332,WTG 11,2020-06-30,V136,,Vestas,112.0,136,180.0,3.6
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90340,,,N131,,Nordex,114.0,131,179.5,3.0
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90341,,,N131,,Nordex,114.0,131,179.5,3.0
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90342,,,N131,,Nordex,114.0,131,179.5,3.0
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90343,,,N131,,Nordex,114.0,131,179.5,3.0
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90344,,,N131,,Nordex,114.0,131,179.5,3.0
+EDS,Energie Deux Sèvres Sas,Saint Laurs (Energie Deux Sèvres),Énergie Deux Sèvres (FRA),90345,,,N131,,Nordex,114.0,131,179.5,3.0
+EDT,Energie Du Touvent,Mont Du Saule,Énergie du Touvent (FRA),921450,WTG 03,2017-12-22,E92,,Enercon,102.0,92,148.0,2.35
+EDT,Energie Du Touvent,Mont Du Saule,Énergie du Touvent (FRA),921449,WTG 02,2017-12-22,E92,,Enercon,102.0,92,148.0,2.35
+EDT,Energie Du Touvent,Mont Du Saule,Énergie du Touvent (FRA),921448,WTG 01,2017-12-22,E92,,Enercon,102.0,92,148.0,2.35
+EHV,Energie Haute Vienne Sas,Magnac-Laval,Énergie Haute Vienne (FRA),248780,,,V136,,Vestas,112.0,136,180.0,2.85
+EHV,Energie Haute Vienne Sas,Magnac-Laval,Énergie Haute Vienne (FRA),248781,,,V136,,Vestas,112.0,136,180.0,2.85
+EHV,Energie Haute Vienne Sas,Magnac-Laval,Énergie Haute Vienne (FRA),248782,,,V136,,Vestas,112.0,136,180.0,2.85
+EHV,Energie Haute Vienne Sas,Magnac-Laval,Énergie Haute Vienne (FRA),248783,,,V136,,Vestas,112.0,136,180.0,2.85
+EIW,Energie Iwuy,Iwuy,Énergie Iwuy (FRA),228229,WTG 15,2019-07-30,V117,,Vestas,116.5,117,175.0,3.6
+EIW,Energie Iwuy,Iwuy,Énergie Iwuy (FRA),228228,WTG 14,2019-07-30,V117,,Vestas,116.5,117,175.0,3.6
+EIW,Energie Iwuy,Iwuy,Énergie Iwuy (FRA),228227,WTG 12,2019-07-30,V117,,Vestas,116.5,117,175.0,3.6
+EIW,Energie Iwuy,Iwuy,Énergie Iwuy (FRA),228226,WTG 11,2019-07-30,V117,,Vestas,116.5,117,175.0,3.6
+EIW,Energie Iwuy,Iwuy,Énergie Iwuy (FRA),228225,WTG 10,2019-07-30,V117,,Vestas,116.5,117,175.0,3.6
+ELT,Energie Les Trente,Les Trente,Énergie les Trente (FRA),213509,WTG 06,2017-03-13,V100,,Vestas,95.0,100,145.0,2.0
+ELT,Energie Les Trente,Les Trente,Énergie les Trente (FRA),213508,WTG 05,2017-03-13,V100,,Vestas,95.0,100,145.0,2.0
+ELT,Energie Les Trente,Les Trente,Énergie les Trente (FRA),213507,WTG 03,2017-03-13,V100,,Vestas,95.0,100,145.0,2.0
+ELT,Energie Les Trente,Les Trente,Énergie les Trente (FRA),213506,WTG 02,2017-03-13,V100,,Vestas,95.0,100,145.0,2.0
+ELT,Energie Les Trente,Les Trente,Énergie les Trente (FRA),213505,WTG 01,2017-03-13,V100,,Vestas,95.0,100,145.0,2.0
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825546,WTG 08,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825545,WTG 07,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825544,WTG 06,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825543,WTG 05,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825542,WTG 04,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825541,WTG 03,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825540,WTG 02,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMG,Energie Montagne Gaillard,Montagne Gaillard,Énergie Montagne Gaillard (FRA),825539,WTG 01,2014-03-14,E82,,Enercon,85.0,82,126.0,2.3
+EMS,Energie Moulismes Sas,Moulismes,0,252049,WTG 01,,V150,,Vestas,125.0,150,200.0,4.2
+EMS,Energie Moulismes Sas,Moulismes,0,252050,WTG 02,,V150,,Vestas,125.0,150,200.0,4.2
+EMS,Energie Moulismes Sas,Moulismes,0,252051,WTG 03,,V150,,Vestas,125.0,150,200.0,4.2
+ENQ,Energie Quincy,Quincy,Énergie Quincy (FRA),225154,WTG 07,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+ENQ,Energie Quincy,Quincy,Énergie Quincy (FRA),225153,WTG 06,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+ENQ,Energie Quincy,Quincy,Énergie Quincy (FRA),225152,WTG 05,2019-01-31,V100,,Vestas,100.0,100,150.0,2.2
+ENT,Energie Tiper Eolien,Tiper Éolien,Énergie Tiper Éolien (FRA),219087,WTG 03,2018-01-22,V100,,Vestas,100.0,100,150.0,2.2
+ENT,Energie Tiper Eolien,Tiper Éolien,Énergie Tiper Éolien (FRA),219086,WTG 02,2018-01-22,V100,,Vestas,100.0,100,150.0,2.2
+ENT,Energie Tiper Eolien,Tiper Éolien,Énergie Tiper Éolien (FRA),219085,WTG 01,2018-01-22,V100,,Vestas,100.0,100,150.0,2.2
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826382,WTG 13,2016-04-04,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826381,WTG 11,2016-04-04,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826380,WTG 09,2016-04-04,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826377,WTG 24,2016-04-04,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826376,WTG 18,2015-12-29,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826375,WTG 04,2015-12-29,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826374,WTG 02,2015-12-29,E82,,Enercon,108.0,82,149.0,2.0
+EOB,Energie De L'Obi,Parc M (Obi),Énergie de l'Obi (FRA),826373,WTG 15,2015-12-29,E82,,Enercon,108.0,82,149.0,2.0
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011010,WTG 07,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011009,WTG 06,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011008,WTG 05,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011007,WTG 04,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011006,WTG 03,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011005,WTG 02,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPC,Energie 21 Poitou-Charentes,Mlhcp,wpd II Poitou Charentes (FRA),1011004,WTG 01,2015-12-01,E101,,Enercon,100.0,101,150.5,3.05
+EPO,Energie Des Poiriers Sas,Les Marnières,Énergie des Poiriers (FRA),248815,,,V110,,Vestas,80.0,110,135.0,2.2
+EPO,Energie Des Poiriers Sas,Les Marnières,Énergie des Poiriers (FRA),248816,,,V110,,Vestas,80.0,110,135.0,2.2
+EPO,Energie Des Poiriers Sas,Les Marnières,Énergie des Poiriers (FRA),248817,,,V110,,Vestas,80.0,110,135.0,2.2
+ESA,Energie Saulzoir Sas,Saulzoir,Énergie Saulzoir (FRA),247470,,,V136,,Vestas,112.0,136,180.0,3.0
+ESA,Energie Saulzoir Sas,Saulzoir,Énergie Saulzoir (FRA),247471,,,V136,,Vestas,112.0,136,180.0,3.0
+ESA,Energie Saulzoir Sas,Saulzoir,Énergie Saulzoir (FRA),247472,,,V136,,Vestas,112.0,136,180.0,3.0
+ESA,Energie Saulzoir Sas,Saulzoir,Énergie Saulzoir (FRA),247473,,,V136,,Vestas,112.0,136,180.0,3.0
+ESA,Energie Saulzoir Sas,Saulzoir,Énergie Saulzoir (FRA),247474,,,V136,,Vestas,112.0,136,180.0,3.0
+ETI,Energie Tigne,Tigné,Énergie Tigné (FRA),826828,WTG 04,2017-12-14,E82,,Enercon,78.0,82,119.0,2.0
+ETI,Energie Tigne,Tigné,Énergie Tigné (FRA),826827,WTG 03,2017-12-14,E82,,Enercon,78.0,82,119.0,2.0
+ETI,Energie Tigne,Tigné,Énergie Tigné (FRA),826826,WTG 02,2017-12-14,E82,,Enercon,78.0,82,119.0,2.0
+ETI,Energie Tigne,Tigné,Énergie Tigné (FRA),826825,WTG 01,2017-12-14,E82,,Enercon,78.0,82,119.0,2.0
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380443,WTG 1,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380444,WTG 2,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380445,WTG 3,2021-06-23,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380446,WTG 4,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380447,WTG 5,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380448,WTG 6,2021-06-23,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380449,WTG 7,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380450,WTG 8,2021-07-26,E138,,Enercon,110.0,138,179.0,3.96
+EVE,Energie Vendee,Auzay,Énergie Vendée (FRA),1380451,WTG 9,2021-06-23,E138,,Enercon,110.0,138,179.0,3.96
+FOI,Energies Des Forieres,Forières,Énergies des Forières (FRA),821369,,,E82,,Enercon,79.0,82,120.0,2.0
+FOI,Energies Des Forieres,Forières,Énergies des Forières (FRA),821370,,,E82,,Enercon,79.0,82,120.0,2.0
+FOI,Energies Des Forieres,Forières,Énergies des Forières (FRA),821371,,,E82,,Enercon,79.0,82,120.0,2.0
+FOI,Energies Des Forieres,Forières,Énergies des Forières (FRA),821372,,,E82,,Enercon,79.0,82,120.0,2.0
+FRG,Eoliennes De Freligne,Fréligné ,Éoliennes de Freligné (FRA),93120,,,MM92,,Senvion,100.0,92,146.0,2.05
+FRG,Eoliennes De Freligne,Fréligné ,Éoliennes de Freligné (FRA),93119,,,MM92,,Senvion,100.0,92,146.0,2.05
+FRG,Eoliennes De Freligne,Fréligné ,Éoliennes de Freligné (FRA),93118,,,MM92,,Senvion,100.0,92,146.0,2.05
+FRG,Eoliennes De Freligne,Fréligné ,Éoliennes de Freligné (FRA),93117,,,MM92,,Senvion,100.0,92,146.0,2.05
+HAT,Energies Des Hauts Traits,Hauts Traits,Énergies des Hauts Traits (FRA),80437,,,N90,,Nordex,80.0,90,125.0,2.5
+HAT,Energies Des Hauts Traits,Hauts Traits,Énergies des Hauts Traits (FRA),80434,,,N90,,Nordex,80.0,90,125.0,2.5
+HAT,Energies Des Hauts Traits,Hauts Traits,Énergies des Hauts Traits (FRA),80435,,,N90,,Nordex,80.0,90,125.0,2.5
+HAT,Energies Des Hauts Traits,Hauts Traits,Énergies des Hauts Traits (FRA),80436,,,N90,,Nordex,80.0,90,125.0,2.5
+LAN,Eoliennes Suroit Snc,Lanrivoaré,Lanrivoaré (FRA),1673,WTG 02,2013-09-16,N60,,Nordex,69.0,60,99.0,1.3
+LAN,Eoliennes Suroit Snc,Lanrivoaré,Lanrivoaré (FRA),1672,WTG 01,2013-09-16,N60,,Nordex,69.0,60,99.0,1.3
+LCH,Energies Des Longs Champs,Longs-Champs,Énergies des Longs Champs (FRA),826659,,,E82,,Enercon,69.0,82,110.0,2.35
+LCH,Energies Des Longs Champs,Longs-Champs,Énergies des Longs Champs (FRA),826660,,,E82,,Enercon,69.0,82,110.0,2.35
+LCH,Energies Des Longs Champs,Longs-Champs,Énergies des Longs Champs (FRA),826661,,,E82,,Enercon,69.0,82,110.0,2.35
+LCH,Energies Des Longs Champs,Longs-Champs,Énergies des Longs Champs (FRA),826662,,,E82,,Enercon,69.0,82,110.0,2.35
+LCH,Energies Des Longs Champs,Longs-Champs,Énergies des Longs Champs (FRA),826663,,,E82,,Enercon,69.0,82,110.0,2.35
+MLG,Eoliennes Suroit Snc,Méligny-Le-Grand,Méligny le Grand (FRA),80384,WTG 03,2013-07-31,MM82,,Senvion,80.0,82,121.0,2.05
+MLG,Eoliennes Suroit Snc,Méligny-Le-Grand,Méligny le Grand (FRA),80383,WTG 02,2013-07-31,MM82,,Senvion,80.0,82,121.0,2.05
+MLG,Eoliennes Suroit Snc,Méligny-Le-Grand,Méligny le Grand (FRA),80382,WTG 04,2013-07-31,MM82,,Senvion,80.0,82,121.0,2.05
+MLG,Eoliennes Suroit Snc,Méligny-Le-Grand,Méligny le Grand (FRA),80381,WTG 01,2013-07-31,MM82,,Senvion,80.0,82,121.0,2.05
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70619,WTG 06,2007-03-08,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70618,WTG 07,2007-03-02,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70620,WTG 05,2007-02-27,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70617,WTG 04,2007-02-23,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70616,WTG 03,2007-02-20,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70621,WTG 01,2007-02-16,MD77,,Senvion,82.0,77,120.5,1.5
+MLH,Eoliennes Suroit Snc,Ménil-La-Horgne,Ménil la Horgne (FRA),70615,WTG 02,2007-02-14,MD77,,Senvion,82.0,77,120.5,1.5
+PEC,Energies Du Petit Caux,Petit-Caux,Énergies du Petit Caux (FRA),80432,,,N90,,Nordex,80.0,90,125.0,2.5
+PEC,Energies Du Petit Caux,Petit-Caux,Énergies du Petit Caux (FRA),80433,,,N90,,Nordex,80.0,90,125.0,2.5
+PEC,Energies Du Petit Caux,Petit-Caux,Énergies du Petit Caux (FRA),80431,,,N90,,Nordex,80.0,90,125.0,2.5
+PEC,Energies Du Petit Caux,Petit-Caux,Énergies du Petit Caux (FRA),80430,,,N90,,Nordex,80.0,90,125.0,2.5
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53740,WTG 07,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53739,WTG 06,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53738,WTG 05,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53737,WTG 04,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53736,WTG 03,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53735,WTG 02,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+ROU,Eoliennes Suroit Snc,Roudouallec,Roudouallec (FRA),53734,WTG 01,2008-09-30,E53,,Enercon,60.0,53,86.5,0.8
+SME,Sepe Du Mont D Ergny,Mont D'Ergny,SEPE du Mont d'Ergny (FRA),783757,WTG 04,2013-01-02,E70,,Enercon,98.0,70,133.0,2.3
+SME,Sepe Du Mont D Ergny,Mont D'Ergny,SEPE du Mont d'Ergny (FRA),783756,WTG 03,2013-01-02,E70,,Enercon,98.0,70,133.0,2.3
+SME,Sepe Du Mont D Ergny,Mont D'Ergny,SEPE du Mont d'Ergny (FRA),783755,WTG 02,2013-01-02,E70,,Enercon,98.0,70,133.0,2.3
+SME,Sepe Du Mont D Ergny,Mont D'Ergny,SEPE du Mont d'Ergny (FRA),783754,WTG 01,2013-01-02,E70,,Enercon,98.0,70,133.0,2.3
+USO,Usson Energies,Usson,Usson Energies (FRA),215367,,,V100,,Vestas,100.0,100,150.0,2.0
+USO,Usson Energies,Usson,Usson Energies (FRA),215368,,,V100,,Vestas,100.0,100,150.0,2.0
+USO,Usson Energies,Usson,Usson Energies (FRA),215369,,,V100,,Vestas,100.0,100,150.0,2.0
+USO,Usson Energies,Usson,Usson Energies (FRA),215370,,,V100,,Vestas,100.0,100,150.0,2.0
+USO,Usson Energies,Usson,Usson Energies (FRA),215371,,,V100,,Vestas,100.0,100,150.0,2.0
+WFLI,Energie Limalonges,Limalonges,Énergie Limalonges (FRA),235625,,,V110,,Vestas,95.0,110,150.0,2.2
+WFLI,Energie Limalonges,Limalonges,Énergie Limalonges (FRA),235626,,,V110,,Vestas,95.0,110,150.0,2.2
+WFLI,Energie Limalonges,Limalonges,Énergie Limalonges (FRA),235627,,,V110,,Vestas,95.0,110,150.0,2.2
+WFLI,Energie Limalonges,Limalonges,Énergie Limalonges (FRA),235628,,,V110,,Vestas,95.0,110,150.0,2.2
+WFLI,Energie Limalonges,Limalonges,Énergie Limalonges (FRA),235629,,,V110,,Vestas,95.0,110,150.0,2.2
+WPC,Wpd Ii Poitou Charentes,Clussais La Pommeraie,Énergie 21 Poitou Charentes (FRA),218240,WTG 05,2018-01-24,V100,,Vestas,100.0,100,150.0,2.2
+WPC,Wpd Ii Poitou Charentes,Clussais La Pommeraie,Énergie 21 Poitou Charentes (FRA),218239,WTG 04,2018-01-24,V100,,Vestas,100.0,100,150.0,2.2
+WPC,Wpd Ii Poitou Charentes,Clussais La Pommeraie,Énergie 21 Poitou Charentes (FRA),218238,WTG 03,2018-01-24,V100,,Vestas,100.0,100,150.0,2.2
+WPC,Wpd Ii Poitou Charentes,Clussais La Pommeraie,Énergie 21 Poitou Charentes (FRA),218237,WTG 02,2018-01-24,V100,,Vestas,100.0,100,150.0,2.2
+WPC,Wpd Ii Poitou Charentes,Clussais La Pommeraie,Énergie 21 Poitou Charentes (FRA),218236,WTG 01,2018-01-24,V100,,Vestas,100.0,100,150.0,2.2
