@@ -7,8 +7,8 @@ from loguru import logger
 import icecream as ic
 
 # Paths
-bronze_dir = Path('DATABASES') / 'france_172074' / 'BRONZE'
-silver_dir = Path('DATABASES') / 'france_172074' / 'SILVER'
+bronze_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
+silver_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'SILVER'
 silver_dir.mkdir(parents=True, exist_ok=True)
 
 ############################

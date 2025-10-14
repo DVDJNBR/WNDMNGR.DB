@@ -7,7 +7,7 @@ DATABASE_EXCEL_FILENAME = "2025_Base De Donnée_V1.xlsx"
 DATABASE_EXCEL_PATH = Path("P:") / "windmanager" / "00_Share point general" / DATABASE_EXCEL_FILENAME
 
 # Architecture Medallion
-BRONZE_DIR = Path('DATABASES') / 'france_172074' / 'BRONZE'
+BRONZE_DIR = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
 BRONZE_DIR.mkdir(parents=True, exist_ok=True)
 
 ###########################
