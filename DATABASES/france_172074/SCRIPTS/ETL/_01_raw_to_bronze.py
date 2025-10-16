@@ -1,10 +1,12 @@
 from pathlib import Path
 import pandas as pd
 from loguru import logger
+import pdfplumber
 
 # Configuration
 DATABASE_EXCEL_FILENAME = "2025_Base De Donnée_V1.xlsx"
 DATABASE_EXCEL_PATH = Path("P:") / "windmanager" / "00_Share point general" / DATABASE_EXCEL_FILENAME
+REPARTITION_PDF_PATH = Path('DATABASES') / 'france_172074' / 'DATA' / '2025.09.29_Répartition des parcs.pdf'
 
 # Architecture Medallion
 BRONZE_DIR = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
@@ -42,3 +44,14 @@ logger.info("Reading DB WTG sheet...")
     .to_csv(BRONZE_DIR / 'dbwtg_sheet.csv', index=False)
 )
 logger.success("DB WTG sheet exported to BRONZE")
+
+################################
+### READ REPARTITION PDF ###
+################################
+logger.info("Reading Repartition PDF...")
+with pdfplumber.open(REPARTITION_PDF_PATH) as pdf:
+    raw_tables = pdf.pages[0].extract_tables()
+    df_repartition = pd.DataFrame(data=raw_tables[0][1:], columns=raw_tables[0][0])
+
+df_repartition.to_csv(BRONZE_DIR / 'repartition_sheet.csv', index=False)
+logger.success("Repartition sheet exported to BRONZE")

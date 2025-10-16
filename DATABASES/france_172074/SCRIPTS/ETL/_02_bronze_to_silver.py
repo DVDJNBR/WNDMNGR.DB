@@ -3,8 +3,26 @@ from pathlib import Path
 import pandas as pd
 import re
 from loguru import logger
+import os
+from dotenv import load_dotenv
 
 import icecream as ic
+
+# Load environment variables
+load_dotenv()
+
+# Personnel codes (RGPD compliance)
+PERS_MMA = os.getenv('PERS_MMA')
+PERS_MMA_SHORT = os.getenv('PERS_MMA_SHORT')
+PERS_GCA = os.getenv('PERS_GCA')
+PERS_HOM = os.getenv('PERS_HOM')
+PERS_FRA = os.getenv('PERS_FRA')
+PERS_ADE = os.getenv('PERS_ADE')
+PERS_VCH = os.getenv('PERS_VCH')
+PERS_AVI = os.getenv('PERS_AVI')
+PERS_ALA = os.getenv('PERS_ALA')
+PERS_LCH = os.getenv('PERS_LCH')
+PERS_LCH_SHORT = os.getenv('PERS_LCH_SHORT')
 
 # Paths
 bronze_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
@@ -24,7 +42,6 @@ df_database = (
     .rename({"end_date_of_o&m_contract":"end_date_of_om_contract"}, axis=1)
     .fillna("") 
     .map(lambda x: re.sub(r'\s+', ' ', x) if isinstance(x, str) else x)
-    .transform_columns(["spv", "project", "customer"], lambda x: str(x).title())
     .transform_columns(
         ["region", "departement", "commune", "head_office_address", "legal_representative", 
         "duty_dreal_contact", "prefecture_name", "prefecture_address", "windmanager_subsidiary",
@@ -128,5 +145,68 @@ df_dbgrid = (
 
 df_dbgrid.to_csv(silver_dir / "dbgrid_sheet.csv", index=False)
 logger.success("DB GRID sheet cleaned and saved to SILVER")
+
+
+################################
+### CLEAN REPARTITION SHEET ###
+################################
+
+logger.info("Starting to clean Repartition sheet...")
+df_repartition = (
+    pd.read_csv(bronze_dir / "repartition_sheet.csv")  # type: ignore
+    .rename(columns=lambda x: x.replace('\n', '_'))
+    .clean_names(case_type="snake", strip_accents=True)
+    .rename(columns=lambda x: x.strip('_'))
+    .fillna("")
+    .map(lambda x: re.sub(r'\s+', ' ', x).strip() if isinstance(x, str) else x)
+    .assign(
+        owner_of_wf=lambda df: df['owner_of_wf'].replace('', pd.NA).ffill(),
+        controller_responsible=lambda df: df['controller_responsible'].replace('Pas de gestion commerciale pour ce portefeuille', ''),
+        technical_manager_by_windfarm=lambda df: df['technical_manager_by_windfarm'].replace(PERS_MMA_SHORT, PERS_MMA),
+        kam=lambda df: df['kam'].str.replace(f'+ {PERS_LCH_SHORT}', f'+ {PERS_LCH}', regex=False)
+    )
+)
+
+# Create new columns
+df_repartition['farm_type'] = df_repartition['wf_abbreviation'].apply(lambda x: 'Solar' if x == 'ESM' else 'Wind')
+df_repartition['substitute_technical_manager'] = df_repartition['technical_manager_by_windfarm'].replace({
+    PERS_MMA: PERS_GCA,
+    PERS_GCA: PERS_MMA,
+    PERS_HOM: PERS_FRA,
+    PERS_FRA: PERS_HOM,
+    PERS_ADE: PERS_VCH,
+    PERS_VCH: PERS_ADE
+})
+df_repartition['substitute_key_account_manager'] = df_repartition['kam'].replace({
+    PERS_AVI: PERS_ALA,
+    PERS_ALA: PERS_AVI,
+    f'{PERS_ALA} + {PERS_LCH}': PERS_AVI
+})
+
+# Reorder columns
+cols = df_repartition.columns.tolist()
+col_order = (
+    cols[0:4] +  # owner_of_wf, windfarm, wf_common_name, wf_abbreviation
+    ['farm_type'] +
+    [cols[4]] +  # technical_manager_by_windfarm
+    ['substitute_technical_manager'] +
+    [cols[5]] +  # kam
+    ['substitute_key_account_manager'] +
+    cols[6:-3]  # rest without the 3 new columns
+)
+df_repartition = df_repartition[col_order]
+
+# Rename columns
+df_repartition = df_repartition.rename(columns={
+    'owner_of_wf': 'owner',
+    'windfarm': 'spv',
+    'wf_common_name': 'project',
+    'wf_abbreviation': 'code',
+    'technical_manager_by_windfarm': 'technical_manager',
+    'kam': 'key_account_manager'
+})
+
+df_repartition.to_csv(silver_dir / "repartition_sheet.csv", index=False)
+logger.success("Repartition sheet cleaned and saved to SILVER")
 
 logger.success("All sheets cleaned and saved to SILVER layer")
