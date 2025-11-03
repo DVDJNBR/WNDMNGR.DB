@@ -88,7 +88,7 @@ person_columns = [
     'electrical_manager',
     'controller_responsible',
     'controller_deputy',
-    'administrative_controller',
+    'administrative_responsible',
     'administrative_deputy'
 ]
 
@@ -99,7 +99,7 @@ for col in person_columns:
         all_persons.extend(persons_in_column)
 
 all_persons_series = pd.Series(all_persons).str.strip().replace('', pd.NA).dropna()
-persons_exploded = all_persons_series.str.split(' \+ ').explode().unique()
+persons_exploded = all_persons_series.str.split(r' \+ ', regex=True).explode().unique()
 
 df_persons = pd.DataFrame({'full_name': persons_exploded})
 df_persons = (

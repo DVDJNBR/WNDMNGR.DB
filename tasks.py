@@ -44,11 +44,25 @@ def bronze_to_silver(c):
     logger.success("Data cleaned and saved to SILVER!")
 
 @task
+def validate_silver(c):
+    """Validate SILVER data quality (BRONZE → SILVER)"""
+    logger.info("Validating SILVER data quality...")
+    c.run(f"python {Path('DATABASES/france_172074/scripts/tests') / 'validate_bronze_to_silver.py'}")
+    logger.success("SILVER data validation complete!")
+
+@task
 def silver_to_gold(c):
     """Transform SILVER to GOLD layer (dedupe, entities, relations)"""
     logger.info("Transforming SILVER to GOLD...")
     c.run(f"python {Path('DATABASES/france_172074/scripts/etl') / '_03_silver_to_gold.py'}")
     logger.success("Data transformed and saved to GOLD!")
+
+@task
+def validate_gold(c):
+    """Validate GOLD data quality with random sampling tests"""
+    logger.info("Validating GOLD data quality...")
+    c.run(f"python {Path('DATABASES/france_172074/scripts/tests') / 'validate_silver_to_gold.py'}")
+    logger.success("GOLD data validation complete!")
 
 @task
 def gold_to_db(c):
@@ -57,15 +71,15 @@ def gold_to_db(c):
     c.run(f"python {Path('DATABASES/france_172074/scripts/etl') / '_04_gold_to_db.py'}")
     logger.success("Data migrated to database!")
 
-@task(raw_to_bronze, bronze_to_silver, silver_to_gold)
+@task(raw_to_bronze, bronze_to_silver, validate_silver, silver_to_gold, validate_gold)
 def etl_pipeline(c):
-    """Run complete ETL pipeline (Bronze → Silver → Gold)"""
-    logger.success("🎉 Full ETL pipeline complete!")
+    """Run complete ETL pipeline with validation (Bronze -> Silver + Validate -> Gold + Validate)"""
+    logger.success("[OK] Full ETL pipeline with validation complete!")
 
-@task(raw_to_bronze, bronze_to_silver, silver_to_gold, gold_to_db)
+@task(raw_to_bronze, bronze_to_silver, validate_silver, silver_to_gold, validate_gold, gold_to_db)
 def etl_full(c):
-    """Run complete ETL pipeline including DB migration (Bronze → Silver → Gold → DB)"""
-    logger.success("🎉 Full ETL pipeline with DB migration complete!")
+    """Run complete ETL pipeline with validation & DB migration (Bronze -> Silver + Validate -> Gold + Validate -> DB)"""
+    logger.success("[OK] Full ETL pipeline with validation & DB migration complete!")
 
 ##################
 ### FULL SETUP ###
