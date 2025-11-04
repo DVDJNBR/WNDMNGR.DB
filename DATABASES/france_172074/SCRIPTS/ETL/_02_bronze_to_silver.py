@@ -35,8 +35,8 @@ silver_dir.mkdir(parents=True, exist_ok=True)
 
 logger.info("Starting to clean Database sheet...")
 df_database = (
-    pd.read_csv(bronze_dir / "database_sheet.csv")  # type: ignore
-    .rename(columns=lambda x: x.strip())  
+    pd.read_csv(bronze_dir / "database_sheet.csv", encoding='utf-8-sig')  # type: ignore
+    .rename(columns=lambda x: x.strip())
     .clean_names(case_type="snake", strip_accents=True) 
     .rename(columns=lambda x: x.strip('_').replace('\n', '')) # remove leading/trailing underscores and newlines in col names
     .rename({"end_date_of_o&m_contract":"end_date_of_om_contract"}, axis=1)
@@ -118,7 +118,7 @@ logger.success("Database sheet cleaned and saved to SILVER")
 
 logger.info("Starting to clean DB WTG sheet...")
 df_dbwtg = (
-    pd.read_csv(bronze_dir / "dbwtg_sheet.csv")  # type: ignore
+    pd.read_csv(bronze_dir / "dbwtg_sheet.csv", encoding='utf-8-sig')  # type: ignore
     .clean_names(case_type="snake", strip_accents=True)
     .fillna("")
     .transform_columns(["spv", "project"], lambda x: str(x).title())
@@ -137,7 +137,7 @@ logger.success("DB WTG sheet cleaned and saved to SILVER")
 
 logger.info("Starting to clean DB GRID sheet...")
 df_dbgrid = (
-    pd.read_csv(bronze_dir / "dbgrid_sheet.csv")  # type: ignore
+    pd.read_csv(bronze_dir / "dbgrid_sheet.csv", encoding='utf-8-sig')  # type: ignore
     .clean_names(case_type="snake", strip_accents=True)
     .fillna("")
     .transform_columns(["customer", "spv", "project", "nom_du_pdl", "grid_operator", "pdl_service_company"], lambda x: str(x).title())
@@ -153,7 +153,7 @@ logger.success("DB GRID sheet cleaned and saved to SILVER")
 
 logger.info("Starting to clean Repartition sheet...")
 df_repartition = (
-    pd.read_csv(bronze_dir / "repartition_sheet.csv")  # type: ignore
+    pd.read_csv(bronze_dir / "repartition_sheet.csv", encoding='utf-8-sig')  # type: ignore
     .rename(columns=lambda x: x.replace('\n', '_'))
     .clean_names(case_type="snake", strip_accents=True)
     .rename(columns=lambda x: x.strip('_'))

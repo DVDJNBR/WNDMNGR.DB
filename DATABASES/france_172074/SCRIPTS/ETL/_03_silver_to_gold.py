@@ -2,6 +2,14 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 import uuid
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Personnel codes (RGPD compliance)
+PERS_LCH = os.getenv('PERS_LCH')
 
 # Paths
 silver_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'SILVER'
@@ -63,7 +71,9 @@ PERSON_ROLES = sorted([
     'Key Account Manager',
     'Substitute Key Account Manager',
     'Asset Manager',
-    'Legal Representative'
+    'Legal Representative',
+    'Overseer',
+    'Commercial Controller'
 ])
 
 df_person_roles = pd.DataFrame({'role_name': PERSON_ROLES})
@@ -78,8 +88,8 @@ logger.success(f"person_roles: {len(df_person_roles)} rows")
 logger.info("Creating entity tables...")
 
 # Load source data
-df_repartition = pd.read_csv(silver_dir / 'repartition_sheet.csv')  # type: ignore
-df_database = pd.read_csv(silver_dir / 'database_sheet.csv')  # type: ignore
+df_repartition = pd.read_csv(silver_dir / 'repartition_sheet.csv', encoding='utf-8-sig')  # type: ignore
+df_database = pd.read_csv(silver_dir / 'database_sheet.csv', encoding='utf-8-sig')  # type: ignore
 
 # Step 1: Extract all persons (from repartition + legal representatives)
 person_columns = [
@@ -102,7 +112,21 @@ unique_legal_reps = df_database['legal_representative'].dropna().unique()
 legal_rep_companies = [rep for rep in unique_legal_reps if rep != '' and any(kw in rep.lower() for kw in ['gestion', 'actifs', 'sas', 'sarl'])]
 legal_rep_persons = [rep for rep in unique_legal_reps if rep != '' and len(rep.split()) == 2 and rep not in legal_rep_companies]
 
-all_persons_list = list(persons_exploded) + legal_rep_persons
+# Extract persons from database_sheet columns (control room, field crew, HSE, overseer, commercial controller)
+database_person_columns = ['control_room_l1', 'field_crew', 'hse_coordination', 'overseer', 'commercial_controller', 'substitute_commercial_controller']
+company_keywords = ['société', 'statkraft', 'seris', 'loire', 'france', 'sas', 'sarl', 'gestion', 'securite', 'securitas']
+
+database_persons = []
+for col in database_person_columns:
+    if col in df_database.columns:
+        unique_values = df_database[col].dropna().unique()
+        for val in unique_values:
+            val_str = str(val).strip()
+            # Filter out empty strings and companies using keywords
+            if val_str != '' and not any(kw in val_str.lower() for kw in company_keywords):
+                database_persons.append(val_str)
+
+all_persons_list = list(persons_exploded) + legal_rep_persons + database_persons
 
 df_persons = pd.DataFrame({'full_name': all_persons_list})
 df_persons = (
@@ -476,9 +500,60 @@ for _, row in df_database.iterrows():
                 'company_uuid': None
             })
 
-# Re-save farm_referents with legal representatives
+# Add database_sheet person columns to farm_referents
+database_column_to_role = {
+    'control_room_l1': 'Control Room Operator',
+    'field_crew': 'Field Crew Manager',
+    'hse_coordination': 'HSE Coordination',
+    'overseer': 'Overseer',
+    'commercial_controller': 'Commercial Controller',
+    'substitute_commercial_controller': 'Commercial Controller'
+}
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    for col_name, role_name in database_column_to_role.items():
+        if col_name in df_database.columns:
+            person_name = row[col_name]
+
+            if pd.notna(person_name) and person_name != '':
+                person_name_str = str(person_name).strip()
+                # Skip companies
+                if not any(kw in person_name_str.lower() for kw in company_keywords):
+                    person_uuid = get_person_uuid(person_name_str)
+                    role_id = role_lookup.get(role_name)
+
+                    if farm_uuid and person_uuid and role_id:
+                        referents_list.append({
+                            'farm_uuid': farm_uuid,
+                            'farm_code': farm_code,
+                            'person_role_id': role_id,
+                            'company_role_id': None,
+                            'person_uuid': person_uuid,
+                            'company_uuid': None
+                        })
+
+# Add Louis Chenel as "Head of Technical Management" for all farms
+louis_chenel_uuid = get_person_uuid(PERS_LCH)
+head_tech_mgmt_role_id = role_lookup.get('Head of Technical Management')
+
+if louis_chenel_uuid and head_tech_mgmt_role_id:
+    for farm_code, farm_uuid in farm_lookup.items():
+        referents_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'person_role_id': head_tech_mgmt_role_id,
+            'company_role_id': None,
+            'person_uuid': louis_chenel_uuid,
+            'company_uuid': None
+        })
+    logger.info(f"Added {PERS_LCH} as Head of Technical Management for all {len(farm_lookup)} farms")
+
+# Re-save farm_referents with all persons (legal reps + database_sheet persons + Louis Chenel)
 df_farm_referents = pd.DataFrame(referents_list).drop_duplicates()
 df_farm_referents.to_csv(gold_dir / 'farm_referents.csv', index=False)
-logger.success(f"farm_referents (updated with legal reps): {len(df_farm_referents)} rows")
+logger.success(f"farm_referents (updated with all persons): {len(df_farm_referents)} rows")
 
 logger.success("All GOLD tables created successfully")

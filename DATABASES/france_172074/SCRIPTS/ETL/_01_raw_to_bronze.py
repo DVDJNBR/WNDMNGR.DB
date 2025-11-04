@@ -19,7 +19,7 @@ logger.info("Reading Database sheet...")
 (
     pd.read_excel(DATABASE_EXCEL_PATH, sheet_name='DataBase', header=1)
     .dropna(subset=['SPV', 'Project', 'Three-letter-code'], how='all')
-    .to_csv(BRONZE_DIR / 'database_sheet.csv', index=False)
+    .to_csv(BRONZE_DIR / 'database_sheet.csv', index=False, encoding='utf-8-sig')
 )
 logger.success("Database sheet exported to BRONZE")
 
@@ -30,7 +30,7 @@ logger.info("Reading DB GRID sheet...")
 (
     pd.read_excel(DATABASE_EXCEL_PATH, sheet_name='DB GRID')
     .dropna(subset=['SPV', 'Project', 'Three-letter-code'], how='all')
-    .to_csv(BRONZE_DIR / 'dbgrid_sheet.csv', index=False)
+    .to_csv(BRONZE_DIR / 'dbgrid_sheet.csv', index=False, encoding='utf-8-sig')
 )
 logger.success("DB GRID sheet exported to BRONZE")
 
@@ -41,7 +41,7 @@ logger.info("Reading DB WTG sheet...")
 (
     pd.read_excel(DATABASE_EXCEL_PATH, sheet_name='DB WTG')
     .dropna(subset=['SPV', 'Project', 'Three-letter-code'], how='all')
-    .to_csv(BRONZE_DIR / 'dbwtg_sheet.csv', index=False)
+    .to_csv(BRONZE_DIR / 'dbwtg_sheet.csv', index=False, encoding='utf-8-sig')
 )
 logger.success("DB WTG sheet exported to BRONZE")
 
@@ -53,5 +53,5 @@ with pdfplumber.open(REPARTITION_PDF_PATH) as pdf:
     raw_tables = pdf.pages[0].extract_tables()
     df_repartition = pd.DataFrame(data=raw_tables[0][1:], columns=raw_tables[0][0])
 
-df_repartition.to_csv(BRONZE_DIR / 'repartition_sheet.csv', index=False)
+df_repartition.to_csv(BRONZE_DIR / 'repartition_sheet.csv', index=False, encoding='utf-8-sig')
 logger.success("Repartition sheet exported to BRONZE")
