@@ -614,4 +614,23 @@ df_farm_environmental_installations = pd.DataFrame(farm_environmental_installati
 df_farm_environmental_installations.to_csv(gold_dir / 'farm_environmental_installations.csv', index=False)
 logger.success(f"farm_environmental_installations: {len(df_farm_environmental_installations)} rows")
 
+# Farm Financial Guarantees
+farm_financial_guarantees_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_financial_guarantees_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'amount': row['financial_guarantee_amount'] if pd.notna(row['financial_guarantee_amount']) else None,
+            'due_date': row['financial_guarantee_due_date'] if pd.notna(row['financial_guarantee_due_date']) else None
+        })
+
+df_farm_financial_guarantees = pd.DataFrame(farm_financial_guarantees_list).drop_duplicates()
+df_farm_financial_guarantees.to_csv(gold_dir / 'farm_financial_guarantees.csv', index=False)
+logger.success(f"farm_financial_guarantees: {len(df_farm_financial_guarantees)} rows")
+
 logger.success("All GOLD tables created successfully")
