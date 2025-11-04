@@ -210,3 +210,4 @@ __marimo__/
 install.py
 
 DATABASES/france_172074/DATA/*
+DATABASES/france_172074/SCRIPTS/TESTS/DATA/*

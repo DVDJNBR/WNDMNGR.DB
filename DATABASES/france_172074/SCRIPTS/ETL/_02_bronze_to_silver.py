@@ -43,13 +43,13 @@ df_database = (
     .fillna("") 
     .map(lambda x: re.sub(r'\s+', ' ', x) if isinstance(x, str) else x)
     .transform_columns(
-        ["region", "departement", "commune", "head_office_address", "legal_representative", 
+        ["customer", "region", "departement", "commune", "head_office_address", "legal_representative",
         "duty_dreal_contact", "prefecture_name", "prefecture_address", "windmanager_subsidiary",
-        "portfolio_name", "asset_manager", "project_developer", "co_developper", 
+        "portfolio_name", "asset_manager", "project_developer", "co_developper",
         "wec_supplier", "wec_service_company", "transfer_station_power_station_service_company",
         "delegataire_electrique_nf_c18_510", "sub_delegataire_electrique_nf_c18_510", "overseer",
         "main_service_company", "service_provider", "expert_comptable_chartered_accountant",
-        "commissaire_aux_comptes_legal_auditor", "energy_trader", "tariff_aggregator", "vppa_name"], 
+        "commissaire_aux_comptes_legal_auditor", "energy_trader", "tariff_aggregator", "vppa_name"],
         lambda x: str(x).title().replace("-", " ")
                         .replace(" De ", " de ").replace(" D'", " d'").replace(" Du ", " du ").replace(" Des ", " des ")
                         .replace(" La ", " la ").replace(" Le ", " le ").replace(" Les ", " les ")
