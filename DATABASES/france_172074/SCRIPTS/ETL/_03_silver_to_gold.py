@@ -556,4 +556,41 @@ df_farm_referents = pd.DataFrame(referents_list).drop_duplicates()
 df_farm_referents.to_csv(gold_dir / 'farm_referents.csv', index=False)
 logger.success(f"farm_referents (updated with all persons): {len(df_farm_referents)} rows")
 
+###########################
+### LOOK UP TABLES ########
+###########################
+
+logger.info("Creating look-up tables...")
+
+# Farm Administrations
+farm_administrations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        # Map remit_subscription: "Yes" variants → 1 (True), else None
+        remit_value = row['remit_subscription']
+        has_remit = 1 if pd.notna(remit_value) and 'yes' in str(remit_value).lower() else None
+
+        farm_administrations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'account_number': row['account_number'] if pd.notna(row['account_number']) else '',
+            'siret_number': row['siret'] if pd.notna(row['siret']) else '',
+            'vat_number': row['vat_number'] if pd.notna(row['vat_number']) else '',
+            'head_office_address': row['head_office_address'] if pd.notna(row['head_office_address']) else '',
+            'legal_representative': row['legal_representative'] if pd.notna(row['legal_representative']) else '',
+            'has_remit_subscription': has_remit,
+            'financial_guarantee_amount': row['financial_guarantee_amount'] if pd.notna(row['financial_guarantee_amount']) else None,
+            'financial_guarantee_due_date': row['financial_guarantee_due_date'] if pd.notna(row['financial_guarantee_due_date']) else None,
+            'land_lease_payment_date': row['land_lease_payment_date'] if pd.notna(row['land_lease_payment_date']) else None,
+            'windmanager_subsidiary': row['windmanager_subsidiary'] if pd.notna(row['windmanager_subsidiary']) else ''
+        })
+
+df_farm_administrations = pd.DataFrame(farm_administrations_list).drop_duplicates()
+df_farm_administrations.to_csv(gold_dir / 'farm_administrations.csv', index=False)
+logger.success(f"farm_administrations: {len(df_farm_administrations)} rows")
+
 logger.success("All GOLD tables created successfully")
