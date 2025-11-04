@@ -593,4 +593,25 @@ df_farm_administrations = pd.DataFrame(farm_administrations_list).drop_duplicate
 df_farm_administrations.to_csv(gold_dir / 'farm_administrations.csv', index=False)
 logger.success(f"farm_administrations: {len(df_farm_administrations)} rows")
 
+# Farm Environmental Installations (ICPE)
+farm_environmental_installations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_environmental_installations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'aip_number': row['aip_number'] if pd.notna(row['aip_number']) else None,
+            'duty_dreal_contact': row['duty_dreal_contact'] if pd.notna(row['duty_dreal_contact']) else None,
+            'prefecture_name': row['prefecture_name'] if pd.notna(row['prefecture_name']) else None,
+            'prefecture_address': row['prefecture_address'] if pd.notna(row['prefecture_address']) else None
+        })
+
+df_farm_environmental_installations = pd.DataFrame(farm_environmental_installations_list).drop_duplicates()
+df_farm_environmental_installations.to_csv(gold_dir / 'farm_environmental_installations.csv', index=False)
+logger.success(f"farm_environmental_installations: {len(df_farm_environmental_installations)} rows")
+
 logger.success("All GOLD tables created successfully")
