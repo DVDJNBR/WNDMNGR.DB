@@ -55,20 +55,20 @@ df_database = (
         "delegataire_electrique_nf_c18_510", "sub_delegataire_electrique_nf_c18_510", "overseer",
         "main_service_company", "service_provider", "expert_comptable_chartered_accountant",
         "commissaire_aux_comptes_legal_auditor", "energy_trader", "tariff_aggregator", "vppa_name"],
-        lambda x: str(x).title().replace("-", " ")
+        lambda x: (str(x) if x else "").title().replace("-", " ")
                         .replace(" De ", " de ").replace(" D'", " d'").replace(" Du ", " du ").replace(" Des ", " des ")
                         .replace(" La ", " la ").replace(" Le ", " le ").replace(" Les ", " les ")
                         .replace(" Et ", " et ").replace(" Sur ", " sur ")
                         .replace(" Rue ", " rue ").replace(" Avenue ", " avenue ").replace(" Boulevard ", " boulevard ")
     )
-    .transform_columns(["region", "departement", "commune"], lambda x: str(x).replace(" ", "-"))
-    .transform_column("duty_dreal_contact", lambda x: str(x).replace(" ", "-").replace("Dreal-", "DREAL "))
-    .transform_columns(["siret", "vat_number"], lambda x: str(x).replace(" ", ""))
-    .transform_column("land_lease_payment_date", lambda x: str(x).title())
+    .transform_columns(["region", "departement", "commune"], lambda x: (str(x) if x else "").replace(" ", "-"))
+    .transform_column("duty_dreal_contact", lambda x: (str(x) if x else "").replace(" ", "-").replace("Dreal-", "DREAL "))
+    .transform_columns(["siret", "vat_number"], lambda x: (str(x) if x else "").replace(" ", ""))
+    .transform_column("land_lease_payment_date", lambda x: (str(x) if x else "").title())
     .transform_columns(
         ["control_room_l1", "field_crew", "hse_coordination",
          "commercial_controller", "substitute_commercial_controller"],
-        lambda x: str(x).title()
+        lambda x: (str(x) if x else "").title()
     )
 )
 
@@ -131,7 +131,7 @@ df_dbwtg = (
     pd.read_csv(bronze_dir / "dbwtg_sheet.csv", encoding='utf-8-sig')  # type: ignore
     .clean_names(case_type="snake", strip_accents=True)
     .fillna("")
-    .transform_columns(["spv", "project"], lambda x: str(x).title())
+    .transform_columns(["spv", "project"], lambda x: (str(x) if x else "").title())
 )
 # converts
 df_dbwtg.wtg_serial_number = pd.to_numeric(df_dbwtg.wtg_serial_number, errors='coerce').astype('Int64')
@@ -150,7 +150,7 @@ df_dbgrid = (
     pd.read_csv(bronze_dir / "dbgrid_sheet.csv", encoding='utf-8-sig')  # type: ignore
     .clean_names(case_type="snake", strip_accents=True)
     .fillna("")
-    .transform_columns(["customer", "spv", "project", "nom_du_pdl", "grid_operator", "pdl_service_company"], lambda x: str(x).title())
+    .transform_columns(["customer", "spv", "project", "nom_du_pdl", "grid_operator", "pdl_service_company"], lambda x: (str(x) if x else "").title())
 )
 
 df_dbgrid.to_csv(silver_dir / "dbgrid_sheet.csv", index=False)
@@ -173,7 +173,7 @@ df_repartition = (
         ["technical_manager_by_windfarm", "kam", "electrical_manager",
          "controller_responsible", "controller_deputy",
          "administrative_responsible", "administrative_deputy"],
-        lambda x: str(x).title()
+        lambda x: (str(x) if x else "").title()
     )
     .assign(
         owner_of_wf=lambda df: df['owner_of_wf'].replace('', pd.NA).ffill(),
@@ -222,14 +222,57 @@ df_repartition = df_repartition.rename(columns={
     'kam': 'key_account_manager'
 })
 
-# Deduplicate accents in person columns (keep version with accents)
+# Normalize person names (inversion + accent deduplication)
 person_cols_repartition = ['technical_manager', 'substitute_technical_manager', 'key_account_manager',
                            'substitute_key_account_manager', 'electrical_manager', 'controller_responsible',
                            'controller_deputy', 'administrative_responsible', 'administrative_deputy']
-person_cols_database = ['control_room_l1', 'field_crew', 'hse_coordination', 'commercial_controller',
-                        'substitute_commercial_controller', 'legal_representative']
+person_cols_database = ['control_room_l1', 'field_crew', 'hse_coordination', 'overseer',
+                        'commercial_controller', 'substitute_commercial_controller', 'legal_representative']
 
-# Build accent deduplication map from both dataframes
+# Step 1: Build name inversion map from PERS_INVERTED (accent-insensitive matching)
+def remove_accents(text):
+    return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
+
+inversion_map = {}
+inversion_map_normalized = {}  # For accent-insensitive lookup
+
+for inverted_name in PERS_INVERTED:
+    parts = inverted_name.split()
+    if len(parts) == 2:
+        # "LastName FirstName" → "FirstName LastName"
+        correct_name = f'{parts[1]} {parts[0]}'
+    elif len(parts) == 3:
+        # "LastName FirstName1 FirstName2" → "FirstName1 FirstName2 LastName"
+        correct_name = f'{parts[1]} {parts[2]} {parts[0]}'
+    else:
+        continue
+
+    # Store both exact and normalized versions
+    inversion_map[inverted_name] = correct_name
+    normalized_key = remove_accents(inverted_name).lower()
+    inversion_map_normalized[normalized_key] = correct_name
+
+# Apply name inversion to all person columns (accent-insensitive)
+def invert_name(name):
+    if pd.isna(name) or name == '':
+        return name
+    name_str = str(name).strip()  # Remove leading/trailing spaces
+    # Try exact match first
+    if name_str in inversion_map:
+        return inversion_map[name_str]
+    # Try normalized match (accent-insensitive, case-insensitive)
+    normalized = remove_accents(name_str).lower().strip()
+    return inversion_map_normalized.get(normalized, name_str)
+
+for col in person_cols_repartition:
+    if col in df_repartition.columns:
+        df_repartition[col] = df_repartition[col].map(invert_name)
+
+for col in person_cols_database:
+    if col in df_database.columns:
+        df_database[col] = df_database[col].map(invert_name)
+
+# Step 2: Build accent deduplication map from both dataframes
 all_person_values = []
 for col in person_cols_repartition:
     if col in df_repartition.columns:
@@ -246,14 +289,14 @@ for val in all_person_values:
         if unaccented not in unaccented_map or (val_str != unaccented and unaccented_map[unaccented] == unaccented):
             unaccented_map[unaccented] = val_str
 
-# Apply deduplication to repartition
+# Step 3: Apply accent deduplication to repartition
 for col in person_cols_repartition:
     if col in df_repartition.columns:
         df_repartition[col] = df_repartition[col].map(
             lambda x: unaccented_map.get(''.join(c for c in unicodedata.normalize('NFD', str(x)) if unicodedata.category(c) != 'Mn'), x) if pd.notna(x) and x != '' else x
         )
 
-# Apply deduplication to database
+# Step 4: Apply accent deduplication to database
 for col in person_cols_database:
     if col in df_database.columns:
         df_database[col] = df_database[col].map(

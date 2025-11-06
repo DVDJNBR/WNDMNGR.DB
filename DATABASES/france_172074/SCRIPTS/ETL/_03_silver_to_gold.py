@@ -137,13 +137,13 @@ df_persons = pd.DataFrame({'full_name': all_persons_list})
 df_persons = df_persons[df_persons['full_name'] != ''].drop_duplicates().reset_index(drop=True)
 
 # Step 3: Split first_name / last_name with particle detection
-particles = ['Le', 'La', 'De', 'Du', 'El', 'Van', 'Von', 'Mc', 'Mac']
+particles = ['le', 'la', 'de', 'du', 'el', 'van', 'von', 'mc', 'mac']  # lowercase for case-insensitive matching
 def split_name(full_name):
-    parts = str(full_name).split()
+    parts = (str(full_name) if full_name else "").split()
     if len(parts) < 2:
-        return parts[0], ''
-    # Check if second-to-last word is a particle (2-3 letters)
-    if len(parts) >= 3 and parts[-2] in particles:
+        return parts[0] if parts else '', ''
+    # Check if second-to-last word is a particle (case-insensitive)
+    if len(parts) >= 3 and parts[-2].lower() in particles:
         return ' '.join(parts[:-2]), ' '.join(parts[-2:])
     # Default: last word is last_name
     return ' '.join(parts[:-1]), parts[-1]
@@ -151,6 +151,12 @@ def split_name(full_name):
 df_persons[['first_name', 'last_name']] = df_persons['full_name'].apply(
     lambda x: pd.Series(split_name(x))
 )
+
+# Add hyphens to compound first names (if 2+ words without hyphen)
+df_persons['first_name'] = df_persons['first_name'].map(
+    lambda x: str(x).replace(' ', '-') if pd.notna(x) and ' ' in str(x) and '-' not in str(x) else x
+)
+
 df_persons = df_persons[['first_name', 'last_name']]
 
 # Step 2: Extract all companies (customers + legal representatives + portfolio + asset manager + developers + service companies + auditors + traders + grid + banks)
@@ -232,11 +238,10 @@ farm_lookup = df_farms.set_index('code')['uuid'].to_dict()
 def get_person_uuid(full_name):
     if pd.isna(full_name) or full_name == '':
         return None
-    parts = full_name.split()
+    parts = str(full_name).split()
     if len(parts) < 2:
         return None
-    first_name = parts[0]
-    last_name = ' '.join(parts[1:])
+    first_name, last_name = split_name(full_name)
     return person_lookup.get((first_name, last_name))
 
 # Map column names to role names
