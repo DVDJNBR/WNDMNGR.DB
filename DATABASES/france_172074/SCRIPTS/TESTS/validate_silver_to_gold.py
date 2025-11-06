@@ -172,7 +172,7 @@ def validate_farm_lineage(silver_row, df_farms, df_farm_types, df_persons, df_re
         referent = df_referents[
             (df_referents['farm_uuid'] == farm_uuid) &
             (df_referents['person_uuid'] == person_uuid) &
-            (df_referents['role_id'] == role_id)
+            (df_referents['person_role_id'] == role_id)
         ]
 
         log_test(

@@ -4,12 +4,17 @@ from loguru import logger
 import uuid
 import os
 from dotenv import load_dotenv
+import unicodedata
 
 # Load environment variables
 load_dotenv()
 
 # Personnel codes (RGPD compliance)
 PERS_LCH = os.getenv('PERS_LCH')
+
+# Names to invert
+PERS_INVERTED_STR = os.getenv('PERS_INVERTED', '')
+PERS_INVERTED = [name.strip() for name in PERS_INVERTED_STR.split(',') if name.strip()]
 
 # Paths
 silver_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'SILVER'
@@ -129,16 +134,24 @@ for col in database_person_columns:
 all_persons_list = list(persons_exploded) + legal_rep_persons + database_persons
 
 df_persons = pd.DataFrame({'full_name': all_persons_list})
-df_persons = (
-    df_persons[df_persons['full_name'] != '']
-    .drop_duplicates()
-    .reset_index(drop=True)
-    .assign(
-        first_name=lambda df: df['full_name'].str.split().str[0],
-        last_name=lambda df: df['full_name'].str.split().str[1:].str.join(' ')
-    )
-    [['first_name', 'last_name']]
+df_persons = df_persons[df_persons['full_name'] != ''].drop_duplicates().reset_index(drop=True)
+
+# Step 3: Split first_name / last_name with particle detection
+particles = ['Le', 'La', 'De', 'Du', 'El', 'Van', 'Von', 'Mc', 'Mac']
+def split_name(full_name):
+    parts = str(full_name).split()
+    if len(parts) < 2:
+        return parts[0], ''
+    # Check if second-to-last word is a particle (2-3 letters)
+    if len(parts) >= 3 and parts[-2] in particles:
+        return ' '.join(parts[:-2]), ' '.join(parts[-2:])
+    # Default: last word is last_name
+    return ' '.join(parts[:-1]), parts[-1]
+
+df_persons[['first_name', 'last_name']] = df_persons['full_name'].apply(
+    lambda x: pd.Series(split_name(x))
 )
+df_persons = df_persons[['first_name', 'last_name']]
 
 # Step 2: Extract all companies (customers + legal representatives + portfolio + asset manager + developers + service companies + auditors + traders + grid + banks)
 unique_customers = df_database['customer'].dropna().unique()

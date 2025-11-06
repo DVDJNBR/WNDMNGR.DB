@@ -5,6 +5,7 @@ import re
 from loguru import logger
 import os
 from dotenv import load_dotenv
+import unicodedata
 
 import icecream as ic
 
@@ -23,6 +24,10 @@ PERS_AVI = os.getenv('PERS_AVI')
 PERS_ALA = os.getenv('PERS_ALA')
 PERS_LCH = os.getenv('PERS_LCH')
 PERS_LCH_SHORT = os.getenv('PERS_LCH_SHORT')
+
+# Names to invert
+PERS_INVERTED_STR = os.getenv('PERS_INVERTED', '')
+PERS_INVERTED = [name.strip() for name in PERS_INVERTED_STR.split(',') if name.strip()]
 
 # Paths
 bronze_dir = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
@@ -56,10 +61,15 @@ df_database = (
                         .replace(" Et ", " et ").replace(" Sur ", " sur ")
                         .replace(" Rue ", " rue ").replace(" Avenue ", " avenue ").replace(" Boulevard ", " boulevard ")
     )
-    .transform_columns(["region", "departement", "commune"], lambda x: str(x).replace(" ", "-"))    
-    .transform_column("duty_dreal_contact", lambda x: str(x).replace(" ", "-").replace("Dreal-", "DREAL "))    
+    .transform_columns(["region", "departement", "commune"], lambda x: str(x).replace(" ", "-"))
+    .transform_column("duty_dreal_contact", lambda x: str(x).replace(" ", "-").replace("Dreal-", "DREAL "))
     .transform_columns(["siret", "vat_number"], lambda x: str(x).replace(" ", ""))
     .transform_column("land_lease_payment_date", lambda x: str(x).title())
+    .transform_columns(
+        ["control_room_l1", "field_crew", "hse_coordination",
+         "commercial_controller", "substitute_commercial_controller"],
+        lambda x: str(x).title()
+    )
 )
 
 ### Convert types
@@ -159,11 +169,17 @@ df_repartition = (
     .rename(columns=lambda x: x.strip('_'))
     .fillna("")
     .map(lambda x: re.sub(r'\s+', ' ', x).strip() if isinstance(x, str) else x)
+    .transform_columns(
+        ["technical_manager_by_windfarm", "kam", "electrical_manager",
+         "controller_responsible", "controller_deputy",
+         "administrative_responsible", "administrative_deputy"],
+        lambda x: str(x).title()
+    )
     .assign(
         owner_of_wf=lambda df: df['owner_of_wf'].replace('', pd.NA).ffill(),
-        controller_responsible=lambda df: df['controller_responsible'].replace('Pas de gestion commerciale pour ce portefeuille', ''),
-        technical_manager_by_windfarm=lambda df: df['technical_manager_by_windfarm'].replace(PERS_MMA_SHORT, PERS_MMA),
-        kam=lambda df: df['kam'].str.replace(f'+ {PERS_LCH_SHORT}', f'+ {PERS_LCH}', regex=False)
+        controller_responsible=lambda df: df['controller_responsible'].replace('Pas De Gestion Commerciale Pour Ce Portefeuille', ''),
+        technical_manager_by_windfarm=lambda df: df['technical_manager_by_windfarm'].replace(PERS_MMA_SHORT.title(), PERS_MMA.title()),
+        kam=lambda df: df['kam'].str.replace(f'+ {PERS_LCH_SHORT.title()}', f'+ {PERS_LCH.title()}', regex=False)
     )
 )
 
@@ -205,6 +221,47 @@ df_repartition = df_repartition.rename(columns={
     'technical_manager_by_windfarm': 'technical_manager',
     'kam': 'key_account_manager'
 })
+
+# Deduplicate accents in person columns (keep version with accents)
+person_cols_repartition = ['technical_manager', 'substitute_technical_manager', 'key_account_manager',
+                           'substitute_key_account_manager', 'electrical_manager', 'controller_responsible',
+                           'controller_deputy', 'administrative_responsible', 'administrative_deputy']
+person_cols_database = ['control_room_l1', 'field_crew', 'hse_coordination', 'commercial_controller',
+                        'substitute_commercial_controller', 'legal_representative']
+
+# Build accent deduplication map from both dataframes
+all_person_values = []
+for col in person_cols_repartition:
+    if col in df_repartition.columns:
+        all_person_values.extend(df_repartition[col].dropna().unique())
+for col in person_cols_database:
+    if col in df_database.columns:
+        all_person_values.extend(df_database[col].dropna().unique())
+
+unaccented_map = {}
+for val in all_person_values:
+    if val != '':
+        val_str = str(val)
+        unaccented = ''.join(c for c in unicodedata.normalize('NFD', val_str) if unicodedata.category(c) != 'Mn')
+        if unaccented not in unaccented_map or (val_str != unaccented and unaccented_map[unaccented] == unaccented):
+            unaccented_map[unaccented] = val_str
+
+# Apply deduplication to repartition
+for col in person_cols_repartition:
+    if col in df_repartition.columns:
+        df_repartition[col] = df_repartition[col].map(
+            lambda x: unaccented_map.get(''.join(c for c in unicodedata.normalize('NFD', str(x)) if unicodedata.category(c) != 'Mn'), x) if pd.notna(x) and x != '' else x
+        )
+
+# Apply deduplication to database
+for col in person_cols_database:
+    if col in df_database.columns:
+        df_database[col] = df_database[col].map(
+            lambda x: unaccented_map.get(''.join(c for c in unicodedata.normalize('NFD', str(x)) if unicodedata.category(c) != 'Mn'), x) if pd.notna(x) and x != '' else x
+        )
+
+# Re-save database with deduplicated names
+df_database.to_csv(silver_dir / "database_sheet.csv", index=False)
 
 df_repartition.to_csv(silver_dir / "repartition_sheet.csv", index=False)
 logger.success("Repartition sheet cleaned and saved to SILVER")

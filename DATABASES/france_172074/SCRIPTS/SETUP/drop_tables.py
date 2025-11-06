@@ -3,7 +3,7 @@ from loguru import logger
 from pathlib import Path
 
 SERVER = 'FRAMGNB107'
-DATABASE = 'windmanager_france_test'
+DATABASE = 'windmanager_france_master'
 
 try:
     with pyodbc.connect(

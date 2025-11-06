@@ -1,8 +1,15 @@
 import pyodbc
 from loguru import logger
 from pathlib import Path
+from ensure_database import ensure_database_exists
+
 SERVER = 'FRAMGNB107'
-DATABASE = 'windmanager_france_test'
+DATABASE = 'windmanager_france_master'
+DRIVER = '{ODBC Driver 17 for SQL Server}'
+
+# Ensure database exists before proceeding (auto-create enabled for invoke)
+if not ensure_database_exists(SERVER, DATABASE, DRIVER, auto_create=True):
+    exit(1)
 
 base_path = Path(__file__).parent.parent.parent
 tables_path = base_path / 'TABLES'
@@ -15,7 +22,7 @@ foreign_keys = tables_path / '05_FOREIGN_KEYS'
 
 try:
     with pyodbc.connect(
-        f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+        f'DRIVER={DRIVER};'
         f'SERVER={SERVER};DATABASE={DATABASE};'
         f'Trusted_Connection=yes;TrustServerCertificate=yes;'
     ).cursor() as cur:
@@ -63,8 +70,6 @@ try:
         logger.info('farm_financial_guarantees ensured')
         cur.execute((look_ups / 'farm_ice_detection_systems.sql').read_text())
         logger.info('farm_ice_detection_systems ensured')
-        cur.execute((look_ups / 'farm_legal_auditors.sql').read_text())
-        logger.info('farm_legal_auditors ensured')
         cur.execute((look_ups / 'farm_locations.sql').read_text())
         logger.info('farm_locations ensured')
         cur.execute((look_ups / 'farm_om_contracts.sql').read_text())

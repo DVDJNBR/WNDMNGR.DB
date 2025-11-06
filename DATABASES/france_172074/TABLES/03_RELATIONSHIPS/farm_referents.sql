@@ -1,18 +1,18 @@
 IF NOT EXISTS (
-    SELECT * 
-    FROM INFORMATION_SCHEMA.TABLES 
-    WHERE TABLE_SCHEMA = 'dbo' 
+    SELECT *
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'dbo'
     AND TABLE_NAME = 'farm_referents'
 )
 BEGIN
     CREATE TABLE dbo.farm_referents (
+        uuid NVARCHAR(36) PRIMARY KEY DEFAULT NEWID(),
         farm_uuid NVARCHAR(36) NOT NULL,
         farm_code NVARCHAR(10) NOT NULL,
         person_role_id INT,
         company_role_id INT,
         person_uuid NVARCHAR(36),
         company_uuid NVARCHAR(36),
-        PRIMARY KEY (farm_uuid, COALESCE(person_role_id, 0), COALESCE(company_role_id, 0)),
         CONSTRAINT fk_fr_farm FOREIGN KEY (farm_uuid) REFERENCES dbo.farms(uuid),
         CONSTRAINT fk_fr_person_role FOREIGN KEY (person_role_id) REFERENCES dbo.person_roles(id),
         CONSTRAINT fk_fr_company_role FOREIGN KEY (company_role_id) REFERENCES dbo.company_roles(id),
