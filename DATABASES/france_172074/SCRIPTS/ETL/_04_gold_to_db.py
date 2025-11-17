@@ -21,6 +21,17 @@ USER = os.getenv('SQL_LOGIN_USER')
 PASSWORD = os.getenv('SQL_LOGIN_PASSWORD')
 DRIVER = '{ODBC Driver 17 for SQL Server}'
 
+# Validate required environment variables
+if not all([SERVER, DATABASE, USER, PASSWORD]):
+    logger.error("Missing required environment variables (SERVER_NAME, DATABASE_NAME, SQL_LOGIN_USER, SQL_LOGIN_PASSWORD)")
+    exit(1)
+
+# Type narrowing for Pylance
+assert SERVER is not None
+assert DATABASE is not None
+assert USER is not None
+assert PASSWORD is not None
+
 # Ensure database exists before proceeding (auto-create enabled for invoke)
 if not ensure_database_exists(SERVER, DATABASE, DRIVER, USER, PASSWORD, auto_create=True):
     exit(1)

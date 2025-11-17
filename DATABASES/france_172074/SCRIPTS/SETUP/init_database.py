@@ -2,13 +2,31 @@ import pyodbc
 from loguru import logger
 from pathlib import Path
 from ensure_database import ensure_database_exists
+import os
+from dotenv import load_dotenv
 
-SERVER = 'FRAMGNB107'
-DATABASE = 'windmanager_france_master'
+# Load environment variables
+load_dotenv()
+
+SERVER = os.getenv('SERVER_NAME')
+DATABASE = os.getenv('DATABASE_NAME')
+USER = os.getenv('SQL_LOGIN_USER')
+PASSWORD = os.getenv('SQL_LOGIN_PASSWORD')
 DRIVER = '{ODBC Driver 17 for SQL Server}'
 
+# Validate required environment variables
+if not all([SERVER, DATABASE, USER, PASSWORD]):
+    logger.error("Missing required environment variables (SERVER_NAME, DATABASE_NAME, SQL_LOGIN_USER, SQL_LOGIN_PASSWORD)")
+    exit(1)
+
+# Type narrowing for Pylance
+assert SERVER is not None
+assert DATABASE is not None
+assert USER is not None
+assert PASSWORD is not None
+
 # Ensure database exists before proceeding (auto-create enabled for invoke)
-if not ensure_database_exists(SERVER, DATABASE, DRIVER, auto_create=True):
+if not ensure_database_exists(SERVER, DATABASE, DRIVER, USER, PASSWORD, auto_create=True):
     exit(1)
 
 base_path = Path(__file__).parent.parent.parent
@@ -24,7 +42,7 @@ try:
     with pyodbc.connect(
         f'DRIVER={DRIVER};'
         f'SERVER={SERVER};DATABASE={DATABASE};'
-        f'Trusted_Connection=yes;TrustServerCertificate=yes;'
+        f'UID={USER};PWD={PASSWORD};Encrypt=no;'
     ).cursor() as cur:
         logger.success("Database connection established")
         ### REFERENCES
