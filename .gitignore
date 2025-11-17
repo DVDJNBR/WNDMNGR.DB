@@ -211,3 +211,7 @@ install.py
 
 DATABASES/france_172074/DATA/*
 DATABASES/france_172074/SCRIPTS/TESTS/DATA/*
+
+# Validation notebooks (local testing only)
+validate_*.ipynb
+test_*.ipynb

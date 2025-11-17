@@ -592,11 +592,21 @@ for _, row in df_database.iterrows():
         remit_value = row['remit_subscription']
         has_remit = 1 if pd.notna(remit_value) and 'yes' in str(remit_value).lower() else None
 
+        # Convert SIRET to string (remove .0 if it's a float)
+        siret_value = ''
+        if pd.notna(row['siret']):
+            siret_value = str(int(float(row['siret']))) if isinstance(row['siret'], (int, float)) else str(row['siret'])
+
+        # Convert account_number to string (remove .0 if it's a float)
+        account_value = ''
+        if pd.notna(row['account_number']):
+            account_value = str(int(float(row['account_number']))) if isinstance(row['account_number'], (int, float)) else str(row['account_number'])
+
         farm_administrations_list.append({
             'farm_uuid': farm_uuid,
             'farm_code': farm_code,
-            'account_number': row['account_number'] if pd.notna(row['account_number']) else '',
-            'siret_number': row['siret'] if pd.notna(row['siret']) else '',
+            'account_number': account_value,
+            'siret_number': siret_value,
             'vat_number': row['vat_number'] if pd.notna(row['vat_number']) else '',
             'head_office_address': row['head_office_address'] if pd.notna(row['head_office_address']) else '',
             'legal_representative': row['legal_representative'] if pd.notna(row['legal_representative']) else '',
@@ -676,5 +686,24 @@ for _, row in df_database.iterrows():
 df_farm_locations = pd.DataFrame(farm_locations_list).drop_duplicates()
 df_farm_locations.to_csv(gold_dir / 'farm_locations.csv', index=False)
 logger.success(f"farm_locations: {len(df_farm_locations)} rows")
+
+# Farm O&M Contracts
+farm_om_contracts_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_om_contracts_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'service_contract_type': row['service_contract_type'] if pd.notna(row['service_contract_type']) else '',
+            'contract_end_date': row['end_date_of_om_contract'] if pd.notna(row['end_date_of_om_contract']) else None
+        })
+
+df_farm_om_contracts = pd.DataFrame(farm_om_contracts_list).drop_duplicates()
+df_farm_om_contracts.to_csv(gold_dir / 'farm_om_contracts.csv', index=False)
+logger.success(f"farm_om_contracts: {len(df_farm_om_contracts)} rows")
 
 logger.success("All GOLD tables created successfully")
