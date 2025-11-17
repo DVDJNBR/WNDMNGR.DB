@@ -178,8 +178,8 @@ df_repartition = (
     .assign(
         owner_of_wf=lambda df: df['owner_of_wf'].replace('', pd.NA).ffill(),
         controller_responsible=lambda df: df['controller_responsible'].replace('Pas De Gestion Commerciale Pour Ce Portefeuille', ''),
-        technical_manager_by_windfarm=lambda df: df['technical_manager_by_windfarm'].replace(PERS_MMA_SHORT.title(), PERS_MMA.title()),
-        kam=lambda df: df['kam'].str.replace(f'+ {PERS_LCH_SHORT.title()}', f'+ {PERS_LCH.title()}', regex=False)
+        technical_manager_by_windfarm=lambda df: df['technical_manager_by_windfarm'].replace(PERS_MMA_SHORT.title() if PERS_MMA_SHORT else '', PERS_MMA.title() if PERS_MMA else ''),
+        kam=lambda df: df['kam'].str.replace(f'+ {PERS_LCH_SHORT.title() if PERS_LCH_SHORT else ""}', f'+ {PERS_LCH.title() if PERS_LCH else ""}', regex=False)
     )
 )
 

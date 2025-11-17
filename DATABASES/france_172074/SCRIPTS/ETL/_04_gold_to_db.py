@@ -7,7 +7,7 @@ from loguru import logger
 
 # Import database helper
 sys.path.insert(0, str(Path(__file__).parent.parent / 'SETUP'))
-from ensure_database import ensure_database_exists
+from ensure_database import ensure_database_exists  # type: ignore
 
 # Configuration
 SERVER = 'FRAMGNB107'
@@ -116,7 +116,8 @@ with pyodbc.connect(connection_string) as conn:
                 if uuid_col and row[uuid_col]:
                     # Check if record exists
                     cursor.execute(f"SELECT COUNT(*) FROM {table_name} WHERE {uuid_col} = ?", row[uuid_col])
-                    exists = cursor.fetchone()[0] > 0
+                    result = cursor.fetchone()
+                    exists = result[0] > 0 if result else False
 
                     if exists:
                         # Update existing record
