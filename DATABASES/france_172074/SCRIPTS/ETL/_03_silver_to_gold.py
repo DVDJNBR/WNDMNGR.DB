@@ -706,4 +706,29 @@ df_farm_om_contracts = pd.DataFrame(farm_om_contracts_list).drop_duplicates()
 df_farm_om_contracts.to_csv(gold_dir / 'farm_om_contracts.csv', index=False)
 logger.success(f"farm_om_contracts: {len(df_farm_om_contracts)} rows")
 
+# Farm TCMA Contracts
+farm_tcma_contracts_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_tcma_contracts_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'wf_status': row['wf_status'] if pd.notna(row['wf_status']) else None,
+            'tcma_status': row['tcma_status'] if pd.notna(row['tcma_status']) else None,
+            'contract_type': row['contract_type'] if pd.notna(row['contract_type']) else None,
+            'signature_date': row['tcma_signature_date'] if pd.notna(row['tcma_signature_date']) else None,
+            'effective_date': row['tcma_entree_en_vigueur'] if pd.notna(row['tcma_entree_en_vigueur']) else None,
+            'beginning_of_remuneration': row['beginning_of_remuneration'] if pd.notna(row['beginning_of_remuneration']) else None,
+            'end_date': row['end_date_of_tcma'] if pd.notna(row['end_date_of_tcma']) else None,
+            'compensation_rate': row['tcma_compensation_rate'] if pd.notna(row['tcma_compensation_rate']) else None
+        })
+
+df_farm_tcma_contracts = pd.DataFrame(farm_tcma_contracts_list).drop_duplicates()
+df_farm_tcma_contracts.to_csv(gold_dir / 'farm_tcma_contracts.csv', index=False)
+logger.success(f"farm_tcma_contracts: {len(df_farm_tcma_contracts)} rows")
+
 logger.success("All GOLD tables created successfully")

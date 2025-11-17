@@ -1,8 +1,16 @@
 import pyodbc
 import sys
 from loguru import logger
+from typing import Optional
 
-def ensure_database_exists(server: str, database: str, driver: str = '{ODBC Driver 17 for SQL Server}', auto_create: bool = False) -> bool:
+def ensure_database_exists(
+    server: str,
+    database: str,
+    driver: str = '{ODBC Driver 17 for SQL Server}',
+    user: Optional[str] = None,
+    password: Optional[str] = None,
+    auto_create: bool = False
+) -> bool:
     """
     Check if database exists, create if needed.
 
@@ -10,12 +18,19 @@ def ensure_database_exists(server: str, database: str, driver: str = '{ODBC Driv
         server: SQL Server instance
         database: Database name
         driver: ODBC driver
+        user: SQL Server login user (optional, uses Windows auth if not provided)
+        password: SQL Server login password (optional)
         auto_create: If True, create without prompt. If False, prompt user.
 
     Returns True if database is ready, False otherwise.
     """
     # Connect to master to check/create database
-    master_conn_str = f'DRIVER={driver};SERVER={server};DATABASE=master;Trusted_Connection=yes;TrustServerCertificate=yes;'
+    if user and password:
+        # SQL Server authentication
+        master_conn_str = f'DRIVER={driver};SERVER={server};DATABASE=master;UID={user};PWD={password};Encrypt=no;'
+    else:
+        # Windows authentication
+        master_conn_str = f'DRIVER={driver};SERVER={server};DATABASE=master;Trusted_Connection=yes;TrustServerCertificate=yes;'
 
     try:
         with pyodbc.connect(master_conn_str) as conn:

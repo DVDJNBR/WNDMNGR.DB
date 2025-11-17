@@ -63,6 +63,7 @@ TABLES = [
     ('farm_financial_guarantees.csv', 'farm_financial_guarantees'),
     ('farm_locations.csv', 'farm_locations'),
     ('farm_om_contracts.csv', 'farm_om_contracts'),
+    ('farm_tcma_contracts.csv', 'farm_tcma_contracts'),
 ]
 
 logger.info(f"Connecting to {SERVER}/{DATABASE}...")

@@ -8,7 +8,7 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 
 ## 1. Feuille "DataBase" (database_sheet.csv)
 
-**Progression :** 36.6% (45/123 colonnes migrées)
+**Progression :** 43.1% (53/123 colonnes migrées)
 
 | Colonne | Migrée | À migrer | Non nécessaire | Destination / Notes |
 |---------|:------:|:--------:|:--------------:|---------------------|
@@ -19,8 +19,8 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 | Account number | [x] | [ ] | [ ] | `farm_administrations.account_number` |
 | WF qty | [ ] | [x] | [ ] | |
 | Project type | [ ] | [x] | [ ] | |
-| WF status | [ ] | [x] | [ ] | |
-| TCMA Status | [ ] | [x] | [ ] | |
+| WF status | [x] | [ ] | [ ] | `farm_tcma_contracts.wf_status` |
+| TCMA Status | [x] | [ ] | [ ] | `farm_tcma_contracts.tcma_status` |
 | Map reference | [x] | [ ] | [ ] | `farm_locations.map_reference` |
 | Region | [x] | [ ] | [ ] | `farm_locations.region` |
 | Département | [x] | [ ] | [ ] | `farm_locations.department` |
@@ -55,12 +55,12 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 | transfer station / power station | [ ] | [x] | [ ] | |
 | Transfer station/power station service company | [x] | [ ] | [ ] | `companies.name` + `farm_company_roles` (role: Substation Service Provider) |
 | Grid operator | [x] | [ ] | [ ] | `companies.name` + `farm_company_roles` (role: Grid Operator) |
-| Contract type | [ ] | [x] | [ ] | |
-| TCMA signature date | [ ] | [x] | [ ] | |
-| TCMA Entrée en vigueur | [ ] | [x] | [ ] | |
-| Beginning of remuneration | [ ] | [x] | [ ] | |
-| End date of TCMA | [ ] | [x] | [ ] | |
-| TCMA compensation rate | [ ] | [x] | [ ] | |
+| Contract type | [x] | [ ] | [ ] | `farm_tcma_contracts.contract_type` |
+| TCMA signature date | [x] | [ ] | [ ] | `farm_tcma_contracts.signature_date` |
+| TCMA Entrée en vigueur | [x] | [ ] | [ ] | `farm_tcma_contracts.effective_date` |
+| Beginning of remuneration | [x] | [ ] | [ ] | `farm_tcma_contracts.beginning_of_remuneration` |
+| End date of TCMA | [x] | [ ] | [ ] | `farm_tcma_contracts.end_date` |
+| TCMA compensation rate | [x] | [ ] | [ ] | `farm_tcma_contracts.compensation_rate` |
 | Arras Technical Management | [ ] | [x] | [ ] | |
 | Control room (L1) | [x] | [ ] | [ ] | `persons` + `farm_referents` (role: Control Room Operator) |
 | Technical Operations Management (L2) | [ ] | [x] | [ ] | |
@@ -179,10 +179,10 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 
 | Feuille | Total | Migrées | À migrer | Non nécessaires | Progression |
 |---------|:-----:|:-------:|:--------:|:---------------:|:-----------:|
-| **DataBase** | 123 | 45 | 76 | 2 | **36.6%** |
+| **DataBase** | 123 | 53 | 68 | 2 | **43.1%** |
 | **DB GRID** | 10 | 0 | 10 | 0 | **0.0%** |
 | **DB WTG** | 14 | 0 | 14 | 0 | **0.0%** |
-| **TOTAL** | **147** | **45** | **100** | **2** | **31.0%** |
+| **TOTAL** | **147** | **53** | **92** | **2** | **36.6%** |
 
 ---
 

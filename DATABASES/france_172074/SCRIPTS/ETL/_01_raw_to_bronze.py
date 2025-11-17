@@ -6,7 +6,7 @@ import pdfplumber
 # Configuration
 DATABASE_EXCEL_FILENAME = "2025_Base De Donnée_V1.xlsx"
 DATABASE_EXCEL_PATH = Path("P:") / "windmanager" / "00_Share point general" / DATABASE_EXCEL_FILENAME
-REPARTITION_PDF_PATH = Path('DATABASES') / 'france_172074' / 'DATA' / '2025.09.29_Répartition des parcs.pdf'
+REPARTITION_PDF_PATH = Path('DATABASES') / 'france_172074' / 'DATA' / '2025.11.06_Répartition des parcs.pdf'
 
 # Architecture Medallion
 BRONZE_DIR = Path('DATABASES') / 'france_172074' / 'DATA' / 'BRONZE'
