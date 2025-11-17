@@ -651,4 +651,30 @@ df_farm_financial_guarantees = pd.DataFrame(farm_financial_guarantees_list).drop
 df_farm_financial_guarantees.to_csv(gold_dir / 'farm_financial_guarantees.csv', index=False)
 logger.success(f"farm_financial_guarantees: {len(df_farm_financial_guarantees)} rows")
 
+# Farm Locations
+farm_locations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_locations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'map_reference': row['map_reference'] if pd.notna(row['map_reference']) else None,
+            'country': 'France',  # Fixed value for this database
+            'region': row['region'] if pd.notna(row['region']) else '',
+            'department': row['departement'] if pd.notna(row['departement']) else '',
+            'municipality': row['commune'] if pd.notna(row['commune']) else '',
+            'arras_round_trip_distance_km': row['km_ar_arras'] if pd.notna(row['km_ar_arras']) else None,
+            'vertou_round_trip_duration_h': row['temps_ar_vertou_en_h'] if pd.notna(row['temps_ar_vertou_en_h']) else None,
+            'arras_toll_eur': row['peages_arras'] if pd.notna(row['peages_arras']) else None,
+            'nantes_toll_eur': row['peages_nantes'] if pd.notna(row['peages_nantes']) else None
+        })
+
+df_farm_locations = pd.DataFrame(farm_locations_list).drop_duplicates()
+df_farm_locations.to_csv(gold_dir / 'farm_locations.csv', index=False)
+logger.success(f"farm_locations: {len(df_farm_locations)} rows")
+
 logger.success("All GOLD tables created successfully")

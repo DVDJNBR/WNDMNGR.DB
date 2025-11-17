@@ -4,26 +4,33 @@ import pyodbc
 import petl as etl
 import pandas as pd
 from loguru import logger
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Import database helper
 sys.path.insert(0, str(Path(__file__).parent.parent / 'SETUP'))
 from ensure_database import ensure_database_exists  # type: ignore
 
-# Configuration
-SERVER = 'FRAMGNB107'
-DATABASE = 'windmanager_france_master'
+# Configuration from .env
+SERVER = os.getenv('SERVER_NAME')
+DATABASE = os.getenv('DATABASE_NAME')
+USER = os.getenv('SQL_LOGIN_USER')
+PASSWORD = os.getenv('SQL_LOGIN_PASSWORD')
 DRIVER = '{ODBC Driver 17 for SQL Server}'
 
 # Ensure database exists before proceeding (auto-create enabled for invoke)
-if not ensure_database_exists(SERVER, DATABASE, DRIVER, auto_create=True):
+if not ensure_database_exists(SERVER, DATABASE, DRIVER, USER, PASSWORD, auto_create=True):
     exit(1)
 
 # Paths (invoke's root path indication)
 root_path = Path(__file__).parent.parent.parent.parent.parent
 gold_dir = root_path / 'DATABASES' / 'france_172074' / 'DATA' / 'GOLD'
 
-# Connection string with Microsoft Entra authentication
-connection_string = f'DRIVER={DRIVER};SERVER={SERVER};DATABASE={DATABASE};Trusted_Connection=yes;'
+# Connection string with SQL Server authentication
+connection_string = f'DRIVER={DRIVER};SERVER={SERVER};DATABASE={DATABASE};UID={USER};PWD={PASSWORD};Encrypt=no;'
 
 # Check for truncate flag
 truncate_mode = '--truncate' in sys.argv
@@ -43,6 +50,7 @@ TABLES = [
     ('farm_administrations.csv', 'farm_administrations'),
     ('farm_environmental_installations.csv', 'farm_environmental_installations'),
     ('farm_financial_guarantees.csv', 'farm_financial_guarantees'),
+    ('farm_locations.csv', 'farm_locations'),
 ]
 
 logger.info(f"Connecting to {SERVER}/{DATABASE}...")
