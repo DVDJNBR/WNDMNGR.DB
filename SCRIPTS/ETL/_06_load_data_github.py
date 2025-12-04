@@ -322,6 +322,25 @@ def validate_required_fields(cursor):
     return len(validation_errors) == 0, validation_errors
 
 
+def connect_with_retry(connection_string, max_retries=3, retry_delay=30):
+    """Connect to Azure SQL with retry logic for cold starts"""
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"Connection attempt {attempt}/{max_retries}...")
+            conn = pyodbc.connect(connection_string, timeout=60)
+            logger.success("✓ Connected to Azure SQL Database")
+            return conn
+        except Exception as e:
+            if attempt < max_retries:
+                logger.warning(f"⚠ Connection failed: {e}")
+                logger.info(f"Retrying in {retry_delay} seconds (Azure SQL may be in cold start)...")
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"✗ Failed to connect after {max_retries} attempts: {e}")
+                raise
+    return None
+
+
 def main():
     """Main ingestion process"""
     start_time = time.time()
@@ -330,12 +349,11 @@ def main():
     logger.info("ETL STEP 6: LOAD DATA TO AZURE SQL (GITHUB ACTIONS)")
     logger.info("=" * 80)
 
-    # Connect to Azure SQL
+    # Connect to Azure SQL with retry logic
     logger.info("Connecting to Azure SQL Database...")
     try:
-        conn = pyodbc.connect(AZURE_SQL_CONNECTION_STRING)
+        conn = connect_with_retry(AZURE_SQL_CONNECTION_STRING)
         cursor = conn.cursor()
-        logger.success("✓ Connected to Azure SQL Database")
     except Exception as e:
         logger.error(f"✗ Failed to connect to database: {e}")
         sys.exit(1)

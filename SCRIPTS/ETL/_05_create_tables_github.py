@@ -5,6 +5,7 @@ Executed by GitHub Actions workflow
 
 import os
 import sys
+import time
 import pyodbc
 from pathlib import Path
 from loguru import logger
@@ -93,6 +94,25 @@ def drop_table_if_exists(cursor, conn, table_name):
         logger.warning(f"  Could not drop {table_name}: {e}")
 
 
+def connect_with_retry(connection_string, max_retries=3, retry_delay=30):
+    """Connect to Azure SQL with retry logic for cold starts"""
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"Connection attempt {attempt}/{max_retries}...")
+            conn = pyodbc.connect(connection_string, timeout=60)
+            logger.success("✓ Connected to Azure SQL Database")
+            return conn
+        except Exception as e:
+            if attempt < max_retries:
+                logger.warning(f"⚠ Connection failed: {e}")
+                logger.info(f"Retrying in {retry_delay} seconds (Azure SQL may be in cold start)...")
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"✗ Failed to connect after {max_retries} attempts: {e}")
+                raise
+    return None
+
+
 def main():
     """Main table creation process"""
     logger.info("=" * 80)
@@ -102,12 +122,11 @@ def main():
     if FORCE_RECREATE:
         logger.warning("⚠️  FORCE_RECREATE is enabled - existing tables will be dropped")
 
-    # Connect to Azure SQL
+    # Connect to Azure SQL with retry logic
     logger.info("Connecting to Azure SQL Database...")
     try:
-        conn = pyodbc.connect(AZURE_SQL_CONNECTION_STRING)
+        conn = connect_with_retry(AZURE_SQL_CONNECTION_STRING)
         cursor = conn.cursor()
-        logger.success("✓ Connected to Azure SQL Database")
     except Exception as e:
         logger.error(f"✗ Failed to connect to database: {e}")
         sys.exit(1)
