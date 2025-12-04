@@ -1,6 +1,11 @@
 name: Create Tables
 
 on:
+  # TEMPORARY: trigger on push to test the workflow (remove after testing)
+  push:
+    branches:
+      - FT/GITHUB_ACTIONS_INGESTION
+
   # Manual trigger only (tables are created once, not on every run)
   workflow_dispatch:
     inputs:
@@ -57,16 +62,16 @@ jobs:
 
       - name: Create tables in Azure SQL
         env:
-          AZURE_SQL_CONNECTION_STRING: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
-          FORCE_RECREATE: ${{ github.event.inputs.force_recreate }}
-          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          AZURE_SQL_CONNECTION_STRING: ${{ (github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD) || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+          FORCE_RECREATE: ${{ github.event.inputs.force_recreate || 'false' }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
         run: |
-          echo "Creating tables in ${{ github.event.inputs.environment }} database..."
+          echo "Creating tables in ${{ github.event.inputs.environment || 'dev' }} database..."
           python SCRIPTS/ETL/_05_create_tables_github.py
 
       - name: Verify tables created
         env:
-          AZURE_SQL_CONNECTION_STRING: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+          AZURE_SQL_CONNECTION_STRING: ${{ (github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD) || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
         run: |
           python -c "
           import pyodbc

@@ -1,6 +1,13 @@
 name: Load Database
 
 on:
+  # TEMPORARY: trigger on push to test the workflow (remove after testing)
+  push:
+    branches:
+      - FT/GITHUB_ACTIONS_INGESTION
+    paths:
+      - '.github/workflows/load-database.yml'
+
   # Manual trigger from any branch
   workflow_dispatch:
     inputs:
