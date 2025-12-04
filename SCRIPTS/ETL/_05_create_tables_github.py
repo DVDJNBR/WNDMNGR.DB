@@ -32,13 +32,12 @@ TABLES_DIR = BASE_DIR / 'TABLES'
 
 # Order of execution (respects dependencies)
 SQL_SCRIPT_CATEGORIES = [
-    '00_REFERENCE',       # Reference tables (farm_types, roles, etc.)
+    '01_REFERENCES',      # Reference tables (farm_types, roles, etc.)
     '01_METADATA',        # Metadata tables (ingestion_versions)
     '02_ENTITIES',        # Core entities (persons, companies, farms, etc.)
     '03_RELATIONSHIPS',   # Junction tables (farm_referents, farm_company_roles)
-    '04_LOOKUPS',         # Lookup tables (administrations, locations, contracts, etc.)
+    '04_LOOK_UPS',        # Lookup tables (administrations, locations, contracts, etc.)
     '05_FOREIGN_KEYS',    # Foreign key constraints
-    '06_INDEXES',         # Indexes for performance
 ]
 
 
@@ -110,7 +109,8 @@ def connect_with_retry(connection_string, max_retries=3, retry_delay=30):
             else:
                 logger.error(f"✗ Failed to connect after {max_retries} attempts: {e}")
                 raise
-    return None
+    # This line should never be reached due to the raise above
+    raise RuntimeError("Connection retry logic failed unexpectedly")
 
 
 def main():

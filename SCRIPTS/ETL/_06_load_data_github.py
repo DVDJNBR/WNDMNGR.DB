@@ -338,7 +338,8 @@ def connect_with_retry(connection_string, max_retries=3, retry_delay=30):
             else:
                 logger.error(f"✗ Failed to connect after {max_retries} attempts: {e}")
                 raise
-    return None
+    # This line should never be reached due to the raise above
+    raise RuntimeError("Connection retry logic failed unexpectedly")
 
 
 def main():
