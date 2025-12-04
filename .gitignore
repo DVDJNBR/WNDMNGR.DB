@@ -201,6 +201,10 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Claude Code
+#  Claude Code local settings and preferences
+.claude/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
@@ -211,12 +215,8 @@ install.py
 AZURE_FUNCTIONS/install.py
 
 # ETL Data directories (generated files, not versioned)
-DATABASES/france_172074/DATA/*
-DATABASES/france_172074/SCRIPTS/TESTS/DATA/*
-
-# Prevent duplicate nested DATABASES directories
-DATABASES/*/DATABASES/
-DATABASES/*/SCRIPTS/ETL/DATABASES/
+DATA/*
+SCRIPTS/TESTS/DATA/*
 
 # Validation notebooks (local testing only)
 validate_*.ipynb

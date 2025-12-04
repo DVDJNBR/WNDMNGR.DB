@@ -8,11 +8,11 @@ DATABASE_EXCEL_FILENAME = "2025_Base De Donnée_V1.xlsx"
 DATABASE_EXCEL_PATH = Path("P:") / "windmanager" / "00_Share point general" / DATABASE_EXCEL_FILENAME
 
 # Paths (absolute from repository root)
-root_path = Path(__file__).parent.parent.parent.parent.parent  # Go up to repo root
-REPARTITION_PDF_PATH = root_path / 'DATABASES' / 'france_172074' / 'DATA' / '2025.11.06_Répartition des parcs.pdf'
+root_path = Path(__file__).parent.parent.parent  # SCRIPTS/ETL/ -> root
+REPARTITION_PDF_PATH = root_path / 'DATA' / '2025.11.06_Répartition des parcs.pdf'
 
 # Architecture Medallion
-BRONZE_DIR = root_path / 'DATABASES' / 'france_172074' / 'DATA' / 'BRONZE'
+BRONZE_DIR = root_path / 'DATA' / 'BRONZE'
 BRONZE_DIR.mkdir(parents=True, exist_ok=True)
 
 ###########################

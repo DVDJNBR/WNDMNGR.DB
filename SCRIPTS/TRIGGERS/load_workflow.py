@@ -7,25 +7,34 @@ import os
 import sys
 import requests
 import argparse
+import warnings
 from dotenv import load_dotenv
+from loguru import logger
+
+# Suppress SSL warnings (Zscaler proxy)
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 load_dotenv()
 
 # Configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-REPO_OWNER = 'YOUR_GITHUB_USERNAME'  # TODO: Update with your GitHub username
-REPO_NAME = 'WNDMNGR.DB'
+REPO_OWNER = os.getenv('GITHUB_REPO_OWNER')
+REPO_NAME = os.getenv('GITHUB_REPO_NAME')
 WORKFLOW_FILE = 'load-database.yml'
 
 def trigger_workflow(environment='dev', branch='FT/GITHUB_ACTIONS_INGESTION'):
     """Trigger the load-database workflow via GitHub API"""
 
     if not GITHUB_TOKEN:
-        print("❌ Error: GITHUB_TOKEN not found in environment variables")
-        print("Please create a GitHub Personal Access Token and add it to your .env file:")
-        print("  1. Go to https://github.com/settings/tokens")
-        print("  2. Generate new token (classic) with 'workflow' scope")
-        print("  3. Add to .env: GITHUB_TOKEN=your_token_here")
+        logger.error("GITHUB_TOKEN not found in environment variables")
+        logger.info("Please create a GitHub Personal Access Token and add it to your .env file:")
+        logger.info("  1. Go to https://github.com/settings/tokens")
+        logger.info("  2. Generate new token (classic) with 'workflow' scope")
+        logger.info("  3. Add to .env: GITHUB_TOKEN=your_token_here")
+        sys.exit(1)
+
+    if not REPO_OWNER or not REPO_NAME:
+        logger.error("GITHUB_REPO_OWNER or GITHUB_REPO_NAME not found in .env")
         sys.exit(1)
 
     url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/workflows/{WORKFLOW_FILE}/dispatches'
@@ -43,20 +52,18 @@ def trigger_workflow(environment='dev', branch='FT/GITHUB_ACTIONS_INGESTION'):
         }
     }
 
-    print(f"🚀 Triggering database ingestion workflow...")
-    print(f"   Environment: {environment}")
-    print(f"   Branch: {branch}")
+    logger.info("Triggering database ingestion workflow...")
+    logger.info(f"Environment: {environment}")
+    logger.info(f"Branch: {branch}")
 
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data, verify=False)
 
     if response.status_code == 204:
-        print(f"✅ Workflow triggered successfully!")
-        print(f"\nView progress at:")
-        print(f"https://github.com/{REPO_OWNER}/{REPO_NAME}/actions/workflows/{WORKFLOW_FILE}")
+        logger.success("Workflow triggered successfully!")
+        logger.info(f"View progress at: https://github.com/{REPO_OWNER}/{REPO_NAME}/actions/workflows/{WORKFLOW_FILE}")
     else:
-        print(f"❌ Failed to trigger workflow")
-        print(f"Status: {response.status_code}")
-        print(f"Response: {response.text}")
+        logger.error(f"Failed to trigger workflow (HTTP {response.status_code})")
+        logger.error(f"Response: {response.text}")
         sys.exit(1)
 
 

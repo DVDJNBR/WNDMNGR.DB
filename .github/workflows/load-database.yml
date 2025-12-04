@@ -68,7 +68,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           echo "Loading data to ${{ steps.env.outputs.environment }} database..."
-          python DATABASES/france_172074/SCRIPTS/ETL/_06_load_data_github.py
+          python SCRIPTS/ETL/_06_load_data_github.py
 
       - name: Upload logs on failure
         if: failure()

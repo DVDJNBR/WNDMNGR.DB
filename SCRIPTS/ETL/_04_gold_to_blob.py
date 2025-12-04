@@ -7,6 +7,7 @@ from azure.storage.blob import BlobServiceClient
 from pathlib import Path
 from loguru import logger
 from dotenv import load_dotenv
+from typing import cast
 
 # Load environment variables
 load_dotenv()
@@ -20,8 +21,13 @@ if not all([STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY, CONTAINER_NAME]):
     logger.error("Missing required environment variables: AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_KEY, AZURE_STORAGE_CONTAINER")
     exit(1)
 
+# Type narrowing for Pylance
+assert STORAGE_ACCOUNT_NAME is not None
+assert STORAGE_ACCOUNT_KEY is not None
+assert CONTAINER_NAME is not None
+
 # Paths
-BASE_DIR = Path(__file__).parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent  # SCRIPTS/ETL/ -> root
 GOLD_DIR = BASE_DIR / 'DATA' / 'GOLD'
 
 def upload_gold_to_blob():
@@ -35,7 +41,7 @@ def upload_gold_to_blob():
     logger.info(f"Connecting to Azure Blob Storage: {STORAGE_ACCOUNT_NAME}")
     connection_string = f"DefaultEndpointsProtocol=https;AccountName={STORAGE_ACCOUNT_NAME};AccountKey={STORAGE_ACCOUNT_KEY};EndpointSuffix=core.windows.net"
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-    container_client = blob_service_client.get_container_client(CONTAINER_NAME)
+    container_client = blob_service_client.get_container_client(cast(str, CONTAINER_NAME))
 
     # Get all CSV files
     csv_files = sorted(GOLD_DIR.glob('*.csv'))

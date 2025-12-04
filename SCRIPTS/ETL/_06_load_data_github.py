@@ -12,11 +12,13 @@ import time
 import json
 import pyodbc
 import pandas as pd
+from io import BytesIO
 from pathlib import Path
 from loguru import logger
 from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from typing import cast
 
 # Load environment variables
 load_dotenv()
@@ -114,7 +116,7 @@ def download_csv_from_blob(blob_service_client, csv_file):
     try:
         blob_data = blob_client.download_blob()
         csv_content = blob_data.readall()
-        return pd.read_csv(pd.io.common.BytesIO(csv_content), encoding='utf-8')
+        return pd.read_csv(BytesIO(csv_content), encoding='utf-8')
     except Exception as e:
         logger.error(f"Failed to download {csv_file}: {e}")
         return None
@@ -166,11 +168,11 @@ def validate_silver_gold_reconciliation(blob_service_client):
         try:
             # Download and count rows
             silver_blob = container_client.get_blob_client(silver_file)
-            silver_df = pd.read_csv(pd.io.common.BytesIO(silver_blob.download_blob().readall()))
+            silver_df = pd.read_csv(BytesIO(silver_blob.download_blob().readall()))
             silver_count = len(silver_df)
 
             gold_blob = container_client.get_blob_client(gold_file)
-            gold_df = pd.read_csv(pd.io.common.BytesIO(gold_blob.download_blob().readall()))
+            gold_df = pd.read_csv(BytesIO(gold_blob.download_blob().readall()))
             gold_count = len(gold_df)
 
             if silver_count != gold_count:
@@ -349,7 +351,7 @@ def main():
 
         # Step 2: Connect to Azure Blob Storage
         logger.info("Connecting to Azure Blob Storage...")
-        blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+        blob_service_client = BlobServiceClient.from_connection_string(cast(str, AZURE_STORAGE_CONNECTION_STRING))
         logger.success("✓ Connected to Azure Blob Storage")
 
         # Step 3: Load all tables

@@ -62,7 +62,7 @@ jobs:
           ENVIRONMENT: ${{ github.event.inputs.environment }}
         run: |
           echo "Creating tables in ${{ github.event.inputs.environment }} database..."
-          python DATABASES/france_172074/SCRIPTS/SETUP/create_tables_github.py
+          python SCRIPTS/SETUP/create_tables_github.py
 
       - name: Verify tables created
         env:

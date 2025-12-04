@@ -36,9 +36,9 @@ assert PASSWORD is not None
 if not ensure_database_exists(SERVER, DATABASE, DRIVER, USER, PASSWORD, auto_create=True):
     exit(1)
 
-# Paths (invoke's root path indication)
-root_path = Path(__file__).parent.parent.parent.parent.parent
-gold_dir = root_path / 'DATABASES' / 'france_172074' / 'DATA' / 'GOLD'
+# Paths
+root_path = Path(__file__).parent.parent.parent  # SCRIPTS/ETL/ -> root
+gold_dir = root_path / 'DATA' / 'GOLD'
 
 # Connection string with SQL Server authentication
 connection_string = f'DRIVER={DRIVER};SERVER={SERVER};DATABASE={DATABASE};UID={USER};PWD={PASSWORD};Encrypt=no;'

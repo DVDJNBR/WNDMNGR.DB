@@ -30,9 +30,9 @@ PERS_INVERTED_STR = os.getenv('PERS_INVERTED', '')
 PERS_INVERTED = [name.strip() for name in PERS_INVERTED_STR.split(',') if name.strip()]
 
 # Paths (absolute from repository root)
-root_path = Path(__file__).parent.parent.parent.parent.parent  # Go up to repo root
-bronze_dir = root_path / 'DATABASES' / 'france_172074' / 'DATA' / 'BRONZE'
-silver_dir = root_path / 'DATABASES' / 'france_172074' / 'DATA' / 'SILVER'
+root_path = Path(__file__).parent.parent.parent  # Go up to repo root
+bronze_dir = root_path / 'DATA' / 'BRONZE'
+silver_dir = root_path / 'DATA' / 'SILVER'
 silver_dir.mkdir(parents=True, exist_ok=True)
 
 ############################
