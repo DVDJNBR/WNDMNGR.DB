@@ -208,6 +208,7 @@ __marimo__/
 
 
 install.py
+AZURE_FUNCTIONS/install.py
 
 # ETL Data directories (generated files, not versioned)
 DATABASES/france_172074/DATA/*
@@ -220,3 +221,18 @@ DATABASES/*/SCRIPTS/ETL/DATABASES/
 # Validation notebooks (local testing only)
 validate_*.ipynb
 test_*.ipynb
+
+# Azure Functions & Power Apps documentation (local guide)
+azurefunctions_powerapps/
+
+# Azure Functions local settings and secrets (deprecated)
+AZURE_FUNCTIONS/.env
+AZURE_FUNCTIONS/.env.azfunc
+AZURE_FUNCTIONS/local.settings.json
+AZURE_FUNCTIONS/.venv_azfunc/
+AZURE_FUNCTIONS/__pycache__/
+AZURE_FUNCTIONS/*/__pycache__/
+
+# GitHub Actions artifacts and logs
+*.log
+.github/workflows/*.log

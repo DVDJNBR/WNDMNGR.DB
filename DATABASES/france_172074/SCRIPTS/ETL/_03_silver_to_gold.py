@@ -732,4 +732,162 @@ df_farm_tcma_contracts = pd.DataFrame(farm_tcma_contracts_list).drop_duplicates(
 df_farm_tcma_contracts.to_csv(gold_dir / 'farm_tcma_contracts.csv', index=False)
 logger.success(f"farm_tcma_contracts: {len(df_farm_tcma_contracts)} rows")
 
-logger.success("All GOLD tables created successfully")
+###########################
+### GRID DATA (SUBSTATIONS)
+###########################
+
+logger.info("Creating substations table from GRID data...")
+
+# Load GRID data
+df_grid = pd.read_csv(silver_dir / 'dbgrid_sheet.csv', encoding='utf-8-sig')
+
+substations_list = []
+
+for _, row in df_grid.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        substations_list.append({
+            'uuid': str(uuid.uuid4()),
+            'substation_name': row['nom_du_pdl'] if pd.notna(row['nom_du_pdl']) else '',
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'gps_coordinates': row['coordonnees_gps'] if pd.notna(row['coordonnees_gps']) else None
+        })
+
+df_substations = pd.DataFrame(substations_list).drop_duplicates()
+df_substations.to_csv(gold_dir / 'substations.csv', index=False)
+logger.success(f"substations: {len(df_substations)} rows")
+
+###########################
+### WTG DATA (WIND TURBINE GENERATORS)
+###########################
+
+logger.info("Creating wind turbine generators table from WTG data...")
+
+# Load WTG data
+df_wtg = pd.read_csv(silver_dir / 'dbwtg_sheet.csv', encoding='utf-8-sig')
+
+# Create substations lookup for WTG assignment
+substations_lookup = {}
+for _, sub in df_substations.iterrows():
+    farm_code = sub['farm_code']
+    if farm_code not in substations_lookup:
+        substations_lookup[farm_code] = sub['uuid']
+
+# Create wind turbine generators
+wtg_list = []
+
+for _, row in df_wtg.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+    substation_uuid = substations_lookup.get(farm_code)
+
+    if farm_uuid and substation_uuid:
+        serial_number = int(row['wtg_serial_number']) if pd.notna(row['wtg_serial_number']) else None
+
+        if serial_number:
+            manufacturer = row['manufacturer'] if pd.notna(row['manufacturer']) else None
+            wtg_type = row['wtg_type'] if pd.notna(row['wtg_type']) else None
+
+            # Handle COD date
+            cod = row['cod'] if pd.notna(row['cod']) else None
+            if cod:
+                try:
+                    cod = pd.to_datetime(cod).strftime('%Y-%m-%d')
+                except:
+                    cod = None
+            else:
+                cod = None
+
+            wtg_list.append({
+                'uuid': str(uuid.uuid4()),
+                'serial_number': serial_number,
+                'wtg_number': row['num_wtg'] if pd.notna(row['num_wtg']) else f'WTG-{serial_number}',
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'substation_uuid': substation_uuid,
+                'manufacturer': manufacturer,
+                'wtg_type': wtg_type,
+                'commercial_operation_date': cod
+            })
+
+df_wtg = pd.DataFrame(wtg_list).drop_duplicates()
+df_wtg.to_csv(gold_dir / 'wind_turbine_generators.csv', index=False)
+logger.success(f"wind_turbine_generators: {len(df_wtg)} rows")
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FARM TURBINE DETAILS (Aggregated per farm from WTG data)
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating farm_turbine_details...")
+
+# Load the original WTG data with all technical details
+df_wtg_full = pd.read_csv(silver_dir / 'dbwtg_sheet.csv', encoding='utf-8-sig')
+
+turbine_details_list = []
+
+for farm_code in df_wtg_full['three_letter_code'].unique():
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if not farm_uuid:
+        continue
+
+    # Filter turbines for this farm
+    farm_turbines = df_wtg_full[df_wtg_full['three_letter_code'] == farm_code]
+
+    # Count turbines
+    turbine_count = len(farm_turbines)
+
+    # Get manufacturer (most common one if multiple)
+    manufacturer = farm_turbines['manufacturer'].mode()[0] if len(farm_turbines['manufacturer'].mode()) > 0 else None
+
+    # Calculate turbine age (from earliest COD to now)
+    cod_dates = pd.to_datetime(farm_turbines['cod'], errors='coerce').dropna()
+    if len(cod_dates) > 0:
+        earliest_cod = cod_dates.min()
+        turbine_age = (pd.Timestamp.now() - earliest_cod).days // 365
+    else:
+        turbine_age = 0
+
+    # Get supplier (using manufacturer as supplier for now)
+    supplier = manufacturer
+
+    # Calculate averages for technical specs (column names from SILVER have brackets)
+    hub_height = farm_turbines['hub_height_[m]'].mean() if 'hub_height_[m]' in farm_turbines.columns and farm_turbines['hub_height_[m]'].notna().any() else None
+    rotor_diameter = farm_turbines['rotor_diameter_[m]'].mean() if 'rotor_diameter_[m]' in farm_turbines.columns and farm_turbines['rotor_diameter_[m]'].notna().any() else None
+    tip_height = farm_turbines['tip_height_m_'].mean() if 'tip_height_m_' in farm_turbines.columns and farm_turbines['tip_height_m_'].notna().any() else None
+    rated_power = farm_turbines['rated_power_[mw]'].mean() if 'rated_power_[mw]' in farm_turbines.columns and farm_turbines['rated_power_[mw]'].notna().any() else None
+
+    # Calculate total MW (sum of all turbines)
+    total_mw = farm_turbines['rated_power_[mw]'].sum() if 'rated_power_[mw]' in farm_turbines.columns and farm_turbines['rated_power_[mw]'].notna().any() else None
+
+    # Get last TOC date if available
+    last_toc = None  # Not available in current data
+
+    # Get dismantling provision date if available
+    dismantling_provision_date = None  # Not available in current data
+
+    # Only add if we have required fields
+    if manufacturer and turbine_count > 0 and hub_height and rotor_diameter and tip_height and rated_power and total_mw:
+        turbine_details_list.append({
+            'wind_farm_uuid': farm_uuid,
+            'wind_farm_code': farm_code,
+            'turbine_count': turbine_count,
+            'manufacturer': manufacturer,
+            'turbine_age': turbine_age,
+            'supplier': supplier,
+            'hub_height_m': round(hub_height, 2),
+            'rotor_diameter_m': round(rotor_diameter, 2),
+            'tip_height_m': round(tip_height, 2),
+            'rated_power_installed_mw': round(rated_power, 2),
+            'total_mmw': round(total_mw, 2),
+            'last_toc': last_toc,
+            'dismantling_provision_date': dismantling_provision_date
+        })
+
+df_turbine_details = pd.DataFrame(turbine_details_list).drop_duplicates()
+df_turbine_details.to_csv(gold_dir / 'farm_turbine_details.csv', index=False)
+logger.success(f"farm_turbine_details: {len(df_turbine_details)} rows")
+
+logger.success("All GOLD tables created successfully (including GRID and WTG data)")

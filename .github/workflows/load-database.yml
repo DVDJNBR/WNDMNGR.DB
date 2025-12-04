@@ -1,0 +1,93 @@
+name: Load Database
+
+on:
+  # Manual trigger from any branch
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+
+  # Automatic trigger on release (semantic-release creates tags)
+  release:
+    types: [published]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  load-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyodbc pandas loguru azure-storage-blob python-dotenv
+
+      - name: Install ODBC Driver for SQL Server
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+            echo "Running in PRODUCTION (triggered by release)"
+          elif [[ "${{ github.event.inputs.environment }}" != "" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "Running in ${{ github.event.inputs.environment }} (manual trigger)"
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "Running in DEV (default)"
+          fi
+
+      - name: Load data to Azure SQL
+        env:
+          AZURE_SQL_CONNECTION_STRING: ${{ steps.env.outputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          echo "Loading data to ${{ steps.env.outputs.environment }} database..."
+          python DATABASES/france_172074/SCRIPTS/ETL/_06_load_data_github.py
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-logs-${{ github.run_id }}
+          path: |
+            *.log
+          retention-days: 7
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Database loaded successfully to ${{ steps.env.outputs.environment }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Database load failed for ${{ steps.env.outputs.environment }}"
+          echo "Check logs for details"

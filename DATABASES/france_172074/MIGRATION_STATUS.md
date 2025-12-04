@@ -135,43 +135,43 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 
 ## 2. Feuille "DB GRID" (dbgrid_sheet.csv)
 
-**Progression :** 0.0% (0/10 colonnes migrées)
+**Progression :** 60.0% (6/10 colonnes migrées)
 
 | Colonne | Migrée | À migrer | Non nécessaire | Destination / Notes |
 |---------|:------:|:--------:|:--------------:|---------------------|
-| Customer | [ ] | [x] | [ ] | |
-| Nom des Parcs Eoliens | [ ] | [x] | [ ] | |
-| SPV | [ ] | [x] | [ ] | |
-| Project | [ ] | [x] | [ ] | |
-| Three-letter-code | [ ] | [x] | [ ] | |
-| Nom du PDL | [ ] | [x] | [ ] | |
-| Grid operator | [ ] | [x] | [ ] | |
-| PDL Service company | [ ] | [x] | [ ] | |
-| Coordonnées GPS | [ ] | [x] | [ ] | |
-| Communes ( Departements) | [ ] | [x] | [ ] | |
+| Customer | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| Nom des Parcs Eoliens | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| SPV | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| Project | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| Three-letter-code | [x] | [ ] | [ ] | `substations.farm_code` |
+| Nom du PDL | [x] | [ ] | [ ] | `substations.substation_name` |
+| Grid operator | [ ] | [ ] | [x] | Déjà dans `farm_company_roles` via `database_sheet.csv` |
+| PDL Service company | [ ] | [ ] | [x] | Déjà dans `farm_company_roles` via `database_sheet.csv` |
+| Coordonnées GPS | [x] | [ ] | [ ] | `substations.gps_coordinates` |
+| Communes ( Departements) | [ ] | [ ] | [x] | Déjà dans `farm_locations` via `database_sheet.csv` |
 
 ---
 
 ## 3. Feuille "DB WTG" (dbwtg_sheet.csv)
 
-**Progression :** 0.0% (0/14 colonnes migrées)
+**Progression :** 90.0% (9/10 colonnes migrées)
 
 | Colonne | Migrée | À migrer | Non nécessaire | Destination / Notes |
 |---------|:------:|:--------:|:--------------:|---------------------|
-| Three-letter-code | [ ] | [x] | [ ] | |
-| SPV | [ ] | [x] | [ ] | |
-| Project | [ ] | [x] | [ ] | |
-| WF name in Rotorsoft | [ ] | [x] | [ ] | |
-| WTG serial number | [ ] | [x] | [ ] | |
-| Num WTG | [ ] | [x] | [ ] | |
-| COD | [ ] | [x] | [ ] | Commercial Operation Date |
-| WTG type | [ ] | [x] | [ ] | |
-| WTG version | [ ] | [x] | [ ] | |
-| Manufacturer | [ ] | [x] | [ ] | |
-| Hub height [m] | [ ] | [x] | [ ] | |
-| Rotor diameter [m] | [ ] | [x] | [ ] | |
-| Tip Height (m) | [ ] | [x] | [ ] | |
-| Rated Power [MW] | [ ] | [x] | [ ] | |
+| Three-letter-code | [x] | [ ] | [ ] | `wind_turbine_generators.farm_code` |
+| SPV | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| Project | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| WF name in Rotorsoft | [ ] | [ ] | [x] | Déjà dans `farms` via `database_sheet.csv` |
+| WTG serial number | [x] | [ ] | [ ] | `wind_turbine_generators.serial_number` |
+| Num WTG | [x] | [ ] | [ ] | `wind_turbine_generators.wtg_number` |
+| COD | [x] | [ ] | [ ] | `wind_turbine_generators.commercial_operation_date` (Commercial Operation Date) |
+| WTG type | [x] | [ ] | [ ] | `wind_turbine_generators.wtg_type` |
+| WTG version | [ ] | [x] | [ ] | À migrer plus tard si nécessaire |
+| Manufacturer | [x] | [ ] | [ ] | `wind_turbine_generators.manufacturer` + `farm_turbine_details.manufacturer` |
+| Hub height [m] | [x] | [ ] | [ ] | `farm_turbine_details.hub_height_m` (moyenne par ferme) |
+| Rotor diameter [m] | [x] | [ ] | [ ] | `farm_turbine_details.rotor_diameter_m` (moyenne par ferme) |
+| Tip Height (m) | [x] | [ ] | [ ] | `farm_turbine_details.tip_height_m` (moyenne par ferme) |
+| Rated Power [MW] | [x] | [ ] | [ ] | `farm_turbine_details.rated_power_installed_mw` + `total_mmw` (moyenne et total par ferme) |
 
 ---
 
@@ -180,12 +180,12 @@ Ce document suit l'état de migration des colonnes des trois feuilles Excel sour
 | Feuille | Total | Migrées | À migrer | Non nécessaires | Progression |
 |---------|:-----:|:-------:|:--------:|:---------------:|:-----------:|
 | **DataBase** | 123 | 53 | 68 | 2 | **43.1%** |
-| **DB GRID** | 10 | 0 | 10 | 0 | **0.0%** |
-| **DB WTG** | 14 | 0 | 14 | 0 | **0.0%** |
-| **TOTAL** | **147** | **53** | **92** | **2** | **36.6%** |
+| **DB GRID** | 10 | 3 | 0 | 7 | **100.0%** |
+| **DB WTG** | 14 | 9 | 1 | 4 | **90.0%** |
+| **TOTAL** | **147** | **65** | **69** | **13** | **48.5%** |
 
 ---
 
-**Dernière mise à jour :** 2025-11-17
+**Dernière mise à jour :** 2025-12-02
 
 **Note :** Le calcul du pourcentage de progression est basé sur : `Migrées / (Migrées + À migrer) × 100`

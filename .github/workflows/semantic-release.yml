@@ -29,3 +29,10 @@ jobs:
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output release info
+        if: steps.release.outputs.released == 'true'
+        run: |
+          echo "Released version: ${{ steps.release.outputs.version }}"
+          echo "Release tag: ${{ steps.release.outputs.tag }}"
+          echo "The load-database workflow will be triggered automatically by the release event"

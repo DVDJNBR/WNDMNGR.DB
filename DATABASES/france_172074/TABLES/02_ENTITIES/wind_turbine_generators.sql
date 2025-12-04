@@ -12,8 +12,8 @@ BEGIN
         farm_uuid NVARCHAR(36) NOT NULL,
         farm_code NVARCHAR(10) NOT NULL,
         substation_uuid NVARCHAR(36) NOT NULL,
-        manufacturer_uuid NVARCHAR(36) NOT NULL,
-        wtg_type INT NOT NULL,
-        commercial_operation_date DATE NOT NULL
+        manufacturer NVARCHAR(100),
+        wtg_type NVARCHAR(50),
+        commercial_operation_date DATE
     );
 END

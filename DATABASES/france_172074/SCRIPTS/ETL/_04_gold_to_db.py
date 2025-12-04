@@ -64,6 +64,10 @@ TABLES = [
     ('farm_locations.csv', 'farm_locations'),
     ('farm_om_contracts.csv', 'farm_om_contracts'),
     ('farm_tcma_contracts.csv', 'farm_tcma_contracts'),
+    ('farm_turbine_details.csv', 'farm_turbine_details'),
+    # Grid and turbine data
+    ('substations.csv', 'substations'),
+    ('wind_turbine_generators.csv', 'wind_turbine_generators'),
 ]
 
 logger.info(f"Connecting to {SERVER}/{DATABASE}...")

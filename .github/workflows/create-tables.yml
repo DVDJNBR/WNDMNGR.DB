@@ -1,0 +1,99 @@
+name: Create Tables
+
+on:
+  # Manual trigger only (tables are created once, not on every run)
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+      force_recreate:
+        description: 'Drop and recreate existing tables (DANGEROUS)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  create-tables:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyodbc loguru python-dotenv
+
+      - name: Install ODBC Driver for SQL Server
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+      - name: Warning for force_recreate
+        if: ${{ github.event.inputs.force_recreate == 'true' }}
+        run: |
+          echo "⚠️  WARNING: force_recreate is enabled"
+          echo "⚠️  This will DROP and RECREATE all tables"
+          echo "⚠️  All data will be LOST"
+          sleep 5
+
+      - name: Create tables in Azure SQL
+        env:
+          AZURE_SQL_CONNECTION_STRING: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+          FORCE_RECREATE: ${{ github.event.inputs.force_recreate }}
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+        run: |
+          echo "Creating tables in ${{ github.event.inputs.environment }} database..."
+          python DATABASES/france_172074/SCRIPTS/SETUP/create_tables_github.py
+
+      - name: Verify tables created
+        env:
+          AZURE_SQL_CONNECTION_STRING: ${{ github.event.inputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+        run: |
+          python -c "
+          import pyodbc
+          import os
+          conn = pyodbc.connect(os.getenv('AZURE_SQL_CONNECTION_STRING'))
+          cursor = conn.cursor()
+          cursor.execute(\"\"\"
+            SELECT TABLE_NAME
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_TYPE = 'BASE TABLE'
+            ORDER BY TABLE_NAME
+          \"\"\")
+          tables = [row[0] for row in cursor.fetchall()]
+          print(f'✅ Found {len(tables)} tables:')
+          for table in tables:
+              print(f'  - {table}')
+          conn.close()
+          "
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Tables created successfully in ${{ github.event.inputs.environment }}"
+          echo "You can now run the 'Load Database' workflow to populate the tables"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Table creation failed for ${{ github.event.inputs.environment }}"
+          echo "Check logs for details"
