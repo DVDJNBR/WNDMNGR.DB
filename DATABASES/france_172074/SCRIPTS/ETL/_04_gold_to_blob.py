@@ -6,14 +6,18 @@ import os
 from azure.storage.blob import BlobServiceClient
 from pathlib import Path
 from loguru import logger
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configuration
-STORAGE_ACCOUNT_NAME = 'stwindmanagerfrance'
+STORAGE_ACCOUNT_NAME = os.getenv('AZURE_STORAGE_ACCOUNT')
 STORAGE_ACCOUNT_KEY = os.getenv('AZURE_STORAGE_KEY')
-CONTAINER_NAME = 'windmanager-data'
+CONTAINER_NAME = os.getenv('AZURE_STORAGE_CONTAINER')
 
-if not STORAGE_ACCOUNT_KEY:
-    logger.error("Missing AZURE_STORAGE_KEY environment variable")
+if not all([STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY, CONTAINER_NAME]):
+    logger.error("Missing required environment variables: AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_KEY, AZURE_STORAGE_CONTAINER")
     exit(1)
 
 # Paths
