@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - FT/GITHUB_ACTIONS_INGESTION
-    paths:
-      - '.github/workflows/load-database.yml'
 
   # Manual trigger from any branch
   workflow_dispatch:
