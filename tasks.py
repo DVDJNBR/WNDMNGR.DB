@@ -1,6 +1,17 @@
 from invoke import task  # type: ignore
 from pathlib import Path
 from loguru import logger
+from dotenv import load_dotenv
+import os
+import requests
+import time
+import urllib3
+
+# Disable SSL warnings (corporate proxy)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Load environment variables from .env
+load_dotenv()
 
 ###################
 ### SETUP TASKS ###
@@ -106,3 +117,141 @@ def etl_full(c):
 def full_setup(c):
     """Initial setup: create DB structure + ETL + load data (first time)"""
     logger.success("🚀 Initial setup complete: DB ready + data loaded!")
+
+#############################
+### GITHUB ACTIONS TASKS ###
+#############################
+
+def _get_github_headers():
+    """Get GitHub API headers with authentication"""
+    token = os.getenv('GITHUB_TOKEN')
+    if not token:
+        logger.error("✗ GITHUB_TOKEN not found in .env file")
+        raise ValueError("Missing GITHUB_TOKEN in .env")
+    return {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
+def _trigger_workflow(workflow_file, inputs=None):
+    """Trigger a GitHub Actions workflow via API"""
+    owner = os.getenv('GITHUB_REPO_OWNER', 'DVDJNBR')
+    repo = os.getenv('GITHUB_REPO_NAME', 'WNDMNGR.DB')
+
+    # Get current branch
+    import subprocess
+    try:
+        current_branch = subprocess.check_output(['git', 'branch', '--show-current'], text=True).strip()
+    except:
+        current_branch = 'main'
+
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/dispatches'
+
+    payload = {
+        'ref': current_branch,
+        'inputs': inputs or {}
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=_get_github_headers(), verify=False)
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        logger.error(f"✗ API request failed: {e}")
+        return False
+
+def _get_workflow_runs(workflow_file, limit=5):
+    """Get recent workflow runs"""
+    owner = os.getenv('GITHUB_REPO_OWNER', 'DVDJNBR')
+    repo = os.getenv('GITHUB_REPO_NAME', 'WNDMNGR.DB')
+
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/runs'
+
+    try:
+        response = requests.get(url, headers=_get_github_headers(), params={'per_page': limit}, verify=False)
+        response.raise_for_status()
+        return response.json()['workflow_runs']
+    except requests.exceptions.RequestException as e:
+        logger.error(f"✗ Failed to get workflow runs: {e}")
+        return []
+
+@task
+def gh_create_tables(c, force=False):
+    """Trigger GitHub Actions workflow to create tables in Azure SQL
+
+    Args:
+        force: Force recreate tables (DANGEROUS - drops existing tables)
+    """
+    logger.info("Triggering 'Create Tables' workflow...")
+
+    inputs = {
+        'force_recreate': 'true' if force else 'false'
+    }
+
+    if _trigger_workflow('create-tables.yml', inputs):
+        logger.success("✓ Workflow triggered!")
+        logger.info("Check status: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
+        logger.info("Wait for completion before running gh-load-data")
+    else:
+        logger.error("✗ Failed to trigger workflow")
+
+@task
+def gh_load_data(c):
+    """Trigger GitHub Actions workflow to load data to Azure SQL
+
+    Note: Tables must be created first (run gh-create-tables)
+    """
+    logger.info("Triggering 'Load Database' workflow...")
+
+    if _trigger_workflow('load-database.yml'):
+        logger.success("✓ Workflow triggered!")
+        logger.info("Monitor: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
+    else:
+        logger.error("✗ Failed to trigger workflow")
+
+@task
+def gh_watch(c, workflow=None):
+    """Watch GitHub Actions workflow runs
+
+    Args:
+        workflow: Specific workflow name (create-tables or load-database), or all if not specified
+    """
+    workflow_file = f"{workflow}.yml" if workflow else None
+
+    if workflow_file:
+        logger.info(f"Recent runs for {workflow}:")
+        runs = _get_workflow_runs(workflow_file, limit=5)
+    else:
+        logger.info("Fetching recent workflow runs...")
+        # Get runs for both workflows
+        create_runs = _get_workflow_runs('create-tables.yml', limit=3)
+        load_runs = _get_workflow_runs('load-database.yml', limit=3)
+        runs = create_runs + load_runs
+        runs = sorted(runs, key=lambda x: x['created_at'], reverse=True)[:10]
+
+    if not runs:
+        logger.warning("No workflow runs found")
+        return
+
+    for run in runs:
+        status_icon = {
+            'completed': '✅' if run['conclusion'] == 'success' else '❌',
+            'in_progress': '⏳',
+            'queued': '⏸️'
+        }.get(run['status'], '❓')
+
+        logger.info(f"{status_icon} [{run['name']}] {run['status']} - {run['created_at']}")
+        logger.info(f"   → {run['html_url']}")
+
+@task(gh_create_tables, gh_load_data)
+def gh_deploy(c, force=False):
+    """Deploy to Azure SQL via GitHub Actions (create tables + load data)
+
+    Args:
+        force: Force recreate tables (DANGEROUS)
+
+    IMPORTANT: This runs workflows sequentially. Monitor progress with: inv gh-watch
+    """
+    logger.success("🚀 GitHub Actions deployment initiated!")
+    logger.info("Monitor workflows: inv gh-watch")
+    logger.info("Or visit: https://github.com/DVDJNBR/WNDMNGR.DB/actions")

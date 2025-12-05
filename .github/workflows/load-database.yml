@@ -1,26 +1,8 @@
 name: Load Database
 
 on:
-  # TEMPORARY: trigger on push to test the workflow (remove after testing)
-  push:
-    branches:
-      - FT/GITHUB_ACTIONS_INGESTION
-
   # Manual trigger from any branch
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
-        default: 'dev'
-
-  # Automatic trigger on release (semantic-release creates tags)
-  release:
-    types: [published]
 
 env:
   PYTHON_VERSION: '3.11'
@@ -51,28 +33,14 @@ jobs:
           sudo apt-get update
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
-      - name: Determine environment
-        id: env
-        run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-            echo "Running in PRODUCTION (triggered by release)"
-          elif [[ "${{ github.event.inputs.environment }}" != "" ]]; then
-            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
-            echo "Running in ${{ github.event.inputs.environment }} (manual trigger)"
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-            echo "Running in DEV (default)"
-          fi
-
       - name: Load data to Azure SQL
         env:
-          AZURE_SQL_CONNECTION_STRING: ${{ steps.env.outputs.environment == 'prod' && secrets.AZURE_SQL_CONNECTION_STRING_PROD || secrets.AZURE_SQL_CONNECTION_STRING_DEV }}
+          AZURE_SQL_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          echo "Loading data to ${{ steps.env.outputs.environment }} database..."
+          echo "Loading data to Azure SQL database..."
           python SCRIPTS/ETL/_06_load_data_github.py
 
       - name: Upload logs on failure
@@ -87,12 +55,12 @@ jobs:
       - name: Notify on success
         if: success()
         run: |
-          echo "✅ Database loaded successfully to ${{ steps.env.outputs.environment }}"
+          echo "✅ Database loaded successfully"
           echo "Triggered by: ${{ github.actor }}"
           echo "Commit: ${{ github.sha }}"
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "❌ Database load failed for ${{ steps.env.outputs.environment }}"
+          echo "❌ Database load failed"
           echo "Check logs for details"
