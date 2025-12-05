@@ -175,6 +175,49 @@ def _get_workflow_runs(workflow_file, limit=5):
         logger.error(f"✗ Failed to get workflow runs: {e}")
         return []
 
+def _wait_for_workflow_completion(workflow_file, timeout=600):
+    """Wait for the most recent workflow run to complete
+
+    Args:
+        workflow_file: The workflow filename (e.g., 'create-tables.yml')
+        timeout: Maximum time to wait in seconds (default: 10 minutes)
+
+    Returns:
+        True if workflow completed successfully, False otherwise
+    """
+    start_time = time.time()
+    check_interval = 10  # Check every 10 seconds
+
+    logger.info(f"Polling workflow status every {check_interval} seconds (timeout: {timeout}s)...")
+
+    while time.time() - start_time < timeout:
+        runs = _get_workflow_runs(workflow_file, limit=1)
+
+        if not runs:
+            logger.warning("No workflow runs found, waiting...")
+            time.sleep(check_interval)
+            continue
+
+        latest_run = runs[0]
+        status = latest_run['status']
+        conclusion = latest_run.get('conclusion')
+
+        if status == 'completed':
+            if conclusion == 'success':
+                logger.success(f"✓ Workflow completed successfully!")
+                return True
+            else:
+                logger.error(f"✗ Workflow failed with conclusion: {conclusion}")
+                logger.error(f"   → {latest_run['html_url']}")
+                return False
+
+        elapsed = int(time.time() - start_time)
+        logger.info(f"⏳ Workflow status: {status} (elapsed: {elapsed}s)")
+        time.sleep(check_interval)
+
+    logger.error(f"✗ Workflow timed out after {timeout} seconds")
+    return False
+
 @task
 def gh_create_tables(c, force=False):
     """Trigger GitHub Actions workflow to create tables in Azure SQL
@@ -243,15 +286,34 @@ def gh_watch(c, workflow=None):
         logger.info(f"{status_icon} [{run['name']}] {run['status']} - {run['created_at']}")
         logger.info(f"   → {run['html_url']}")
 
-@task(gh_create_tables, gh_load_data)
+@task
 def gh_deploy(c, force=False):
     """Deploy to Azure SQL via GitHub Actions (create tables + load data)
 
     Args:
         force: Force recreate tables (DANGEROUS)
 
-    IMPORTANT: This runs workflows sequentially. Monitor progress with: inv gh-watch
+    This runs workflows SEQUENTIALLY: create tables first, then waits for completion before loading data.
     """
-    logger.success("🚀 GitHub Actions deployment initiated!")
-    logger.info("Monitor workflows: inv gh-watch")
+    logger.info("🚀 Starting GitHub Actions deployment...")
+
+    # Step 1: Trigger create tables
+    logger.info("Step 1/2: Creating tables...")
+    gh_create_tables(c, force=force)
+
+    # Step 2: Wait for create-tables to complete
+    logger.info("Waiting for 'Create Tables' workflow to complete...")
+    if not _wait_for_workflow_completion('create-tables.yml', timeout=600):
+        logger.error("✗ Create Tables workflow failed or timed out")
+        logger.error("Cannot proceed with data loading. Fix the issue and try again.")
+        return
+
+    logger.success("✓ Tables created successfully!")
+
+    # Step 3: Trigger load data
+    logger.info("Step 2/2: Loading data...")
+    gh_load_data(c)
+
+    logger.success("🚀 Deployment workflows triggered!")
+    logger.info("Monitor final status: python -m invoke gh-watch")
     logger.info("Or visit: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
