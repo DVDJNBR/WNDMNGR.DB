@@ -90,6 +90,13 @@ def validate_gold(c):
     logger.success("GOLD data validation complete!")
 
 @task
+def validate_lookups(c):
+    """Validate lookup tables (farm_statuses, farm_substation_details, etc.)"""
+    logger.info("Validating lookup tables...")
+    c.run(f"python {Path('SCRIPTS/TESTS') / 'validate_lookup_tables.py'}")
+    logger.success("Lookup tables validation complete!")
+
+@task
 def upload_gold_to_blob(c):
     """Upload GOLD CSV files to Azure Blob Storage"""
     logger.info("Uploading GOLD CSVs to Azure Blob Storage...")
