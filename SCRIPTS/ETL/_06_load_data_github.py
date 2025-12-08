@@ -69,6 +69,7 @@ TABLES = [
 
     # 5. Grid infrastructure (reference farms)
     ('substations.csv', 'substations'),
+    ('farm_substation_details.csv', 'farm_substation_details'),
 
     # 6. Wind turbine generators (reference farms and substations)
     ('wind_turbine_generators.csv', 'wind_turbine_generators'),

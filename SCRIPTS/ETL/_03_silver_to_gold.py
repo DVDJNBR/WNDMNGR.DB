@@ -760,6 +760,41 @@ df_substations = pd.DataFrame(substations_list).drop_duplicates()
 df_substations.to_csv(gold_dir / 'substations.csv', index=False)
 logger.success(f"substations: {len(df_substations)} rows")
 
+# ═══════════════════════════════════════════════════════════════════════════
+# FARM SUBSTATION DETAILS (Aggregated substation info per farm)
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating farm_substation_details...")
+
+substation_details_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if not farm_uuid:
+        continue
+
+    # Count substations for this farm
+    station_count = len(df_substations[df_substations['farm_code'] == farm_code])
+
+    # Get substation service company
+    substation_service_company = row['transfer_station_power_station_service_company']
+
+    if pd.notna(substation_service_company) and substation_service_company != '' and station_count > 0:
+        substation_service_company_uuid = company_lookup.get(substation_service_company)
+
+        if substation_service_company_uuid:
+            substation_details_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'station_count': station_count,
+                'substation_service_company_uuid': substation_service_company_uuid
+            })
+
+df_farm_substation_details = pd.DataFrame(substation_details_list).drop_duplicates()
+df_farm_substation_details.to_csv(gold_dir / 'farm_substation_details.csv', index=False)
+logger.success(f"farm_substation_details: {len(df_farm_substation_details)} rows")
+
 ###########################
 ### WTG DATA (WIND TURBINE GENERATORS)
 ###########################
