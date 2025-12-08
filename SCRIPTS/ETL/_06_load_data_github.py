@@ -53,6 +53,7 @@ TABLES = [
     ('persons.csv', 'persons'),
     ('companies.csv', 'companies'),
     ('farms.csv', 'farms'),
+    ('ice_detection_systems.csv', 'ice_detection_systems'),
 
     # 3. Relationship tables (reference persons, companies, farms, roles)
     ('farm_referents.csv', 'farm_referents'),
@@ -66,6 +67,7 @@ TABLES = [
     ('farm_tcma_contracts.csv', 'farm_tcma_contracts'),
     ('farm_turbine_details.csv', 'farm_turbine_details'),
     ('farm_statuses.csv', 'farm_statuses'),
+    ('farm_ice_detection_systems.csv', 'farm_ice_detection_systems'),
     # Note: farm_financial_guarantees excluded due to poor data quality
 
     # 5. Grid infrastructure (reference farms)

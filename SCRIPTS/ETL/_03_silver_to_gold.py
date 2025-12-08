@@ -944,4 +944,74 @@ df_turbine_details = pd.DataFrame(turbine_details_list).drop_duplicates()
 df_turbine_details.to_csv(gold_dir / 'farm_turbine_details.csv', index=False)
 logger.success(f"farm_turbine_details: {len(df_turbine_details)} rows")
 
+# ═══════════════════════════════════════════════════════════════════════════
+# ICE DETECTION SYSTEMS
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating ice detection systems...")
+
+# Parse ice detection system column
+ice_col = 'ice_detection_system_automatic_stop_yes_no_;_automatic_restart_yes_no'
+ice_systems_set = set()
+
+for _, row in df_database.iterrows():
+    ice_value = row[ice_col]
+    if pd.notna(ice_value) and ice_value != '':
+        ice_systems_set.add(ice_value)
+
+# Parse each system: "System Name (YES ; NO)"
+ice_systems_list = []
+
+for ice_str in ice_systems_set:
+    # Extract system name and flags
+    if '(' in ice_str and ')' in ice_str:
+        name = ice_str.split('(')[0].strip()
+        flags = ice_str.split('(')[1].split(')')[0]  # Get "YES ; NO" part
+
+        # Parse YES/NO flags
+        parts = [p.strip().upper() for p in flags.split(';')]
+        automatic_stop = 1 if len(parts) > 0 and parts[0] == 'YES' else 0
+        automatic_restart = 1 if len(parts) > 1 and parts[1] == 'YES' else 0
+
+        ice_systems_list.append({
+            'uuid': str(uuid.uuid4()),
+            'ids_name': name,
+            'automatic_stop': automatic_stop,
+            'automatic_restart': automatic_restart
+        })
+
+df_ice_systems = pd.DataFrame(ice_systems_list)
+df_ice_systems.to_csv(gold_dir / 'ice_detection_systems.csv', index=False)
+logger.success(f"ice_detection_systems: {len(df_ice_systems)} rows")
+
+# Create farm_ice_detection_systems (many-to-many relationship)
+farm_ice_systems_list = []
+
+# Create lookup: ice system string -> uuid
+ice_system_lookup = {}
+for _, sys in df_ice_systems.iterrows():
+    # Match by reconstructing the original format
+    for ice_str in ice_systems_set:
+        if sys['ids_name'] in ice_str:
+            ice_system_lookup[ice_str] = sys['uuid']
+            break
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+    ice_value = row[ice_col]
+
+    if farm_uuid and pd.notna(ice_value) and ice_value != '':
+        ice_system_uuid = ice_system_lookup.get(ice_value)
+
+        if ice_system_uuid:
+            farm_ice_systems_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'ice_detection_system_uuid': ice_system_uuid
+            })
+
+df_farm_ice_systems = pd.DataFrame(farm_ice_systems_list).drop_duplicates()
+df_farm_ice_systems.to_csv(gold_dir / 'farm_ice_detection_systems.csv', index=False)
+logger.success(f"farm_ice_detection_systems: {len(df_farm_ice_systems)} rows")
+
 logger.success("All GOLD tables created successfully (including GRID and WTG data)")
