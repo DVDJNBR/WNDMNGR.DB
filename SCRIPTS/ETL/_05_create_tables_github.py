@@ -33,11 +33,11 @@ TABLES_DIR = BASE_DIR / 'TABLES'
 # Order of execution (respects dependencies)
 SQL_SCRIPT_CATEGORIES = [
     '01_REFERENCES',      # Reference tables (farm_types, roles, etc.)
-    '01_METADATA',        # Metadata tables (ingestion_versions)
     '02_ENTITIES',        # Core entities (persons, companies, farms, etc.)
     '03_RELATIONSHIPS',   # Junction tables (farm_referents, farm_company_roles)
     '04_LOOK_UPS',        # Lookup tables (administrations, locations, contracts, etc.)
     '05_FOREIGN_KEYS',    # Foreign key constraints
+    '06_METADATA',        # Metadata tables (ingestion_versions)
 ]
 
 
@@ -54,7 +54,7 @@ def execute_sql_script(cursor, conn, sql_file):
 
         for i, batch in enumerate(batches, 1):
             # Skip comments-only batches
-            if not batch or batch.startswith('--'):
+            if not batch:
                 continue
 
             try:
