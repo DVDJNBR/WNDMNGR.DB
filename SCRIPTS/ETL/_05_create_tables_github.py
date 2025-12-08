@@ -159,9 +159,11 @@ def main():
                 total_scripts += 1
 
                 # If force recreate, drop table first (only for table creation scripts)
+                # EXCLUDE ingestion_versions to preserve deployment history
+                table_name = sql_file.stem  # Assumes filename = table name
                 if FORCE_RECREATE and category in ['01_REFERENCES', '02_ENTITIES', '03_RELATIONSHIPS', '04_LOOK_UPS', '06_METADATA']:
-                    table_name = sql_file.stem  # Assumes filename = table name
-                    drop_table_if_exists(cursor, conn, table_name)
+                    if table_name != 'ingestion_versions':
+                        drop_table_if_exists(cursor, conn, table_name)
 
                 # Execute the script
                 if execute_sql_script(cursor, conn, sql_file):
