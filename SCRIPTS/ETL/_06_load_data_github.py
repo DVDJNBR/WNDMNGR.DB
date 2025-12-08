@@ -42,24 +42,20 @@ if not AZURE_STORAGE_CONNECTION_STRING:
     sys.exit(1)
 
 # Tables to load (order matters for FK constraints)
-# CRITICAL: Reference tables MUST be loaded BEFORE tables that reference them
+# NOTE: Reference tables (farm_types, company_roles, person_roles) are populated
+# by their CREATE TABLE scripts, so we don't load them from CSVs
 TABLES = [
-    # 1. Reference tables (no dependencies)
-    ('farm_types.csv', 'farm_types'),
-    ('company_roles.csv', 'company_roles'),
-    ('person_roles.csv', 'person_roles'),
-
-    # 2. Entity tables (reference farm_types)
+    # 1. Entity tables
     ('persons.csv', 'persons'),
     ('companies.csv', 'companies'),
     ('farms.csv', 'farms'),
     ('ice_detection_systems.csv', 'ice_detection_systems'),
 
-    # 3. Relationship tables (reference persons, companies, farms, roles)
+    # 2. Relationship tables (reference persons, companies, farms, roles)
     ('farm_referents.csv', 'farm_referents'),
     ('farm_company_roles.csv', 'farm_company_roles'),
 
-    # 4. Look-up tables (reference farms)
+    # 3. Look-up tables (reference farms)
     ('farm_administrations.csv', 'farm_administrations'),
     ('farm_environmental_installations.csv', 'farm_environmental_installations'),
     ('farm_locations.csv', 'farm_locations'),
@@ -70,11 +66,11 @@ TABLES = [
     ('farm_ice_detection_systems.csv', 'farm_ice_detection_systems'),
     # Note: farm_financial_guarantees excluded due to poor data quality
 
-    # 5. Grid infrastructure (reference farms)
+    # 4. Grid infrastructure (reference farms)
     ('substations.csv', 'substations'),
     ('farm_substation_details.csv', 'farm_substation_details'),
 
-    # 6. Wind turbine generators (reference farms and substations)
+    # 5. Wind turbine generators (reference farms and substations)
     ('wind_turbine_generators.csv', 'wind_turbine_generators'),
 ]
 
