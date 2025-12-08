@@ -143,7 +143,9 @@ def load_table(cursor, conn, df, table_name):
     if 'id' in df.columns:
         df = df.drop(columns=['id'])
 
-    # Replace NaN with None (NULL)
+    # Replace NaN with None (NULL) - must use replace for proper conversion
+    df = df.replace({pd.NA: None, pd.NaT: None, float('nan'): None})
+    # Also convert remaining NaN values
     df = df.where(pd.notna(df), None)
 
     # Insert rows
@@ -154,7 +156,9 @@ def load_table(cursor, conn, df, table_name):
     inserted = 0
     for _, row in df.iterrows():
         try:
-            cursor.execute(insert_query, *row.values)
+            # Convert row values to list and replace any remaining NaN
+            values = [None if pd.isna(v) else v for v in row.values]
+            cursor.execute(insert_query, *values)
             inserted += 1
         except Exception as e:
             logger.error(f"Failed to insert row into {table_name}: {e}")
