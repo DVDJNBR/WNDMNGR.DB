@@ -40,12 +40,19 @@ def test_farm_statuses(df_database, df_farms, df_farm_statuses):
     logger.info("Testing farm_statuses")
     logger.info("="*80)
 
-    # Test 1: Row count should match farms
+    # Test 1: Row count should be <= farms (some farms may not be in database_sheet)
     log_test(
-        "Row count matches number of farms",
-        len(df_farm_statuses) == len(df_farms),
-        f"Expected {len(df_farms)} rows, got {len(df_farm_statuses)}"
+        "Row count is valid (≤ farms)",
+        len(df_farm_statuses) <= len(df_farms),
+        f"Expected ≤ {len(df_farms)} rows, got {len(df_farm_statuses)}"
     )
+
+    # Log farms without status
+    farms_with_status = set(df_farm_statuses['farm_code'])
+    all_farms = set(df_farms['code'])
+    missing_farms = all_farms - farms_with_status
+    if missing_farms:
+        logger.info(f"   Note: {len(missing_farms)} farms without status (not in database_sheet): {', '.join(sorted(missing_farms))}")
 
     # Test 2: All farm_uuids should exist in farms table
     valid_farm_uuids = set(df_farms['uuid'])
