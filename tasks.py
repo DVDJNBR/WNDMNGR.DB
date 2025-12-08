@@ -89,10 +89,22 @@ def validate_gold(c):
     c.run(f"python {Path('SCRIPTS/TESTS') / 'validate_silver_to_gold.py'}")
     logger.success("GOLD data validation complete!")
 
+@task
+def upload_gold_to_blob(c):
+    """Upload GOLD CSV files to Azure Blob Storage"""
+    logger.info("Uploading GOLD CSVs to Azure Blob Storage...")
+    c.run(f"python {Path('SCRIPTS/ETL') / '_04_gold_to_blob.py'}")
+    logger.success("GOLD files uploaded to Azure Blob!")
+
 @task(raw_to_bronze, bronze_to_silver, validate_silver, silver_to_gold, validate_gold)
 def etl_pipeline(c):
     """Run ETL pipeline to GOLD layer with validation"""
     logger.success("[OK] ETL pipeline to GOLD complete!")
+
+@task(etl_pipeline, upload_gold_to_blob)
+def etl_to_blob(c):
+    """Run ETL pipeline + upload GOLD to Azure Blob"""
+    logger.success("[OK] ETL pipeline + GOLD uploaded to blob!")
 
 @task(etl_pipeline, ingest_data)
 def etl_ingest(c):
@@ -317,3 +329,27 @@ def gh_deploy(c, force=False):
     logger.success("🚀 Deployment workflows triggered!")
     logger.info("Monitor final status: python -m invoke gh-watch")
     logger.info("Or visit: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
+
+@task(etl_to_blob)
+def full_deploy(c, force=False):
+    """Complete pipeline: ETL local → Upload blob → Deploy to Azure SQL
+
+    Args:
+        force: Force recreate tables (DANGEROUS)
+
+    This is the COMPLETE workflow:
+    1. ETL: Excel (P:\\) → BRONZE → SILVER → GOLD (local)
+    2. Upload GOLD CSVs to Azure Blob Storage
+    3. GitHub Actions: Create tables + Load data to Azure SQL
+
+    Use this for end-to-end deployment from Excel to Azure SQL.
+    """
+    logger.info("=" * 80)
+    logger.info("FULL DEPLOYMENT PIPELINE")
+    logger.info("=" * 80)
+    logger.success("✓ ETL completed and GOLD uploaded to blob")
+    logger.info("Starting GitHub Actions deployment...")
+    gh_deploy(c, force=force)
+    logger.success("=" * 80)
+    logger.success("✓ FULL DEPLOYMENT COMPLETE!")
+    logger.success("=" * 80)
