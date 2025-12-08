@@ -159,7 +159,7 @@ def main():
                 total_scripts += 1
 
                 # If force recreate, drop table first (only for table creation scripts)
-                if FORCE_RECREATE and category in ['00_REFERENCE', '01_METADATA', '02_ENTITIES', '03_RELATIONSHIPS', '04_LOOKUPS']:
+                if FORCE_RECREATE and category in ['01_REFERENCES', '02_ENTITIES', '03_RELATIONSHIPS', '04_LOOK_UPS', '06_METADATA']:
                     table_name = sql_file.stem  # Assumes filename = table name
                     drop_table_if_exists(cursor, conn, table_name)
 
