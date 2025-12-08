@@ -145,6 +145,50 @@ def test_farm_substation_details(df_database, df_farms, df_substations, df_subst
         )
 
 
+def test_ice_detection_systems(df_database, df_farms, df_ice_systems, df_farm_ice_systems):
+    """Test ice detection systems tables"""
+    logger.info("\n" + "="*80)
+    logger.info("Testing ice_detection_systems")
+    logger.info("="*80)
+
+    # Test 1: Should have at least 1 system
+    log_test(
+        "At least one ice detection system exists",
+        len(df_ice_systems) > 0,
+        "No ice detection systems found"
+    )
+
+    # Test 2: All systems should have valid boolean flags
+    for _, sys in df_ice_systems.iterrows():
+        log_test(
+            f"System '{sys['ids_name']}' has valid flags",
+            sys['automatic_stop'] in [0, 1] and sys['automatic_restart'] in [0, 1],
+            f"Invalid flags: stop={sys['automatic_stop']}, restart={sys['automatic_restart']}"
+        )
+
+    # Test 3: All farm_uuids in farm_ice_systems should exist
+    valid_farm_uuids = set(df_farms['uuid'])
+    farm_ice_uuids = set(df_farm_ice_systems['farm_uuid'])
+    invalid_uuids = farm_ice_uuids - valid_farm_uuids
+
+    log_test(
+        "All farm_uuids are valid",
+        len(invalid_uuids) == 0,
+        f"Found {len(invalid_uuids)} invalid farm UUIDs"
+    )
+
+    # Test 4: All ice system UUIDs should exist
+    valid_ice_uuids = set(df_ice_systems['uuid'])
+    farm_ice_system_uuids = set(df_farm_ice_systems['ice_detection_system_uuid'])
+    invalid_ice_uuids = farm_ice_system_uuids - valid_ice_uuids
+
+    log_test(
+        "All ice detection system UUIDs are valid",
+        len(invalid_ice_uuids) == 0,
+        f"Found {len(invalid_ice_uuids)} invalid ice system UUIDs"
+    )
+
+
 def main():
     """Main validation function"""
     logger.info("=" * 80)
@@ -167,12 +211,16 @@ def main():
         df_substations = pd.read_csv(gold_dir / 'substations.csv')
         logger.success(f"   ✓ GOLD substations: {len(df_substations)} rows")
 
-        # Check if new tables exist
+        # Check if tables exist
         farm_statuses_path = gold_dir / 'farm_statuses.csv'
         substation_details_path = gold_dir / 'farm_substation_details.csv'
+        ice_systems_path = gold_dir / 'ice_detection_systems.csv'
+        farm_ice_systems_path = gold_dir / 'farm_ice_detection_systems.csv'
 
         has_farm_statuses = farm_statuses_path.exists()
         has_substation_details = substation_details_path.exists()
+        has_ice_systems = ice_systems_path.exists()
+        has_farm_ice_systems = farm_ice_systems_path.exists()
 
         if has_farm_statuses:
             df_farm_statuses = pd.read_csv(farm_statuses_path)
@@ -185,6 +233,18 @@ def main():
             logger.success(f"   ✓ GOLD farm_substation_details: {len(df_substation_details)} rows")
         else:
             logger.warning(f"   ⚠ GOLD farm_substation_details not found - run ETL script first")
+
+        if has_ice_systems:
+            df_ice_systems = pd.read_csv(ice_systems_path)
+            logger.success(f"   ✓ GOLD ice_detection_systems: {len(df_ice_systems)} rows")
+        else:
+            logger.warning(f"   ⚠ GOLD ice_detection_systems not found - run ETL script first")
+
+        if has_farm_ice_systems:
+            df_farm_ice_systems = pd.read_csv(farm_ice_systems_path)
+            logger.success(f"   ✓ GOLD farm_ice_detection_systems: {len(df_farm_ice_systems)} rows")
+        else:
+            logger.warning(f"   ⚠ GOLD farm_ice_detection_systems not found - run ETL script first")
 
     except FileNotFoundError as e:
         logger.error(f"✗ File not found: {e}")
@@ -201,6 +261,9 @@ def main():
 
     if has_substation_details:
         test_farm_substation_details(df_database, df_farms, df_substations, df_substation_details, df_companies)
+
+    if has_ice_systems and has_farm_ice_systems:
+        test_ice_detection_systems(df_database, df_farms, df_ice_systems, df_farm_ice_systems)
 
     # Summary
     logger.info("\n" + "="*80)
