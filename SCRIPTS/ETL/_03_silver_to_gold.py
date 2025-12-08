@@ -732,6 +732,25 @@ df_farm_tcma_contracts = pd.DataFrame(farm_tcma_contracts_list).drop_duplicates(
 df_farm_tcma_contracts.to_csv(gold_dir / 'farm_tcma_contracts.csv', index=False)
 logger.success(f"farm_tcma_contracts: {len(df_farm_tcma_contracts)} rows")
 
+# Farm Statuses
+farm_statuses_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_statuses_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'farm_status': row['wf_status'] if pd.notna(row['wf_status']) else '',
+            'tcma_status': row['tcma_status'] if pd.notna(row['tcma_status']) else ''
+        })
+
+df_farm_statuses = pd.DataFrame(farm_statuses_list).drop_duplicates()
+df_farm_statuses.to_csv(gold_dir / 'farm_statuses.csv', index=False)
+logger.success(f"farm_statuses: {len(df_farm_statuses)} rows")
+
 ###########################
 ### GRID DATA (SUBSTATIONS)
 ###########################

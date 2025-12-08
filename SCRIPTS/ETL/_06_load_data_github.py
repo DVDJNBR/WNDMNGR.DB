@@ -65,6 +65,7 @@ TABLES = [
     ('farm_om_contracts.csv', 'farm_om_contracts'),
     ('farm_tcma_contracts.csv', 'farm_tcma_contracts'),
     ('farm_turbine_details.csv', 'farm_turbine_details'),
+    ('farm_statuses.csv', 'farm_statuses'),
     # Note: farm_financial_guarantees excluded due to poor data quality
 
     # 5. Grid infrastructure (reference farms)
