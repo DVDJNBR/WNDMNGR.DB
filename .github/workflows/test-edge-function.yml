@@ -1,0 +1,102 @@
+name: Test Edge Function Execute SQL
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test-edge-function:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Test Edge Function
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'EOF'
+          import os
+          import requests
+          import json
+
+          print("=" * 60)
+          print("TEST EDGE FUNCTION: Execute SQL from Storage")
+          print("=" * 60)
+
+          url = os.getenv('SUPABASE_URL')
+          key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+
+          if not url or not key:
+              print("❌ Missing credentials!")
+              exit(1)
+
+          print(f"\nProject: {url}")
+
+          # The SQL file we uploaded earlier
+          file_path = '01_REFERENCES/company_roles.sql'
+
+          print(f"\n[1] Calling Edge Function to execute: {file_path}")
+
+          # Call Edge Function
+          edge_function_url = f'{url}/functions/v1/execute-sql'
+
+          response = requests.post(
+              edge_function_url,
+              headers={
+                  'Authorization': f'Bearer {key}',
+                  'Content-Type': 'application/json'
+              },
+              json={
+                  'filePath': file_path
+              },
+              timeout=30
+          )
+
+          print(f"\n[2] Response status: {response.status_code}")
+
+          if response.status_code in [200, 207]:
+              result = response.json()
+              print(f"\n[3] Response:")
+              print(json.dumps(result, indent=2))
+
+              if result.get('success'):
+                  print("\n" + "=" * 60)
+                  print("✅ SUCCESS!")
+                  print(f"Executed {result['successCount']}/{result['totalStatements']} statements")
+                  print("Table company_roles créée!")
+                  print("=" * 60)
+              else:
+                  print("\n" + "=" * 60)
+                  print("⚠ PARTIAL SUCCESS")
+                  print(f"Success: {result['successCount']}, Failed: {result['failCount']}")
+                  print("\nErrors:")
+                  for r in result.get('results', []):
+                      if not r.get('success'):
+                          print(f"  - {r.get('preview', '')[:50]}...")
+                          print(f"    Error: {r.get('error', '')}")
+                  print("=" * 60)
+                  exit(1)
+          else:
+              print("\n" + "=" * 60)
+              print("❌ ÉCHEC")
+              print(f"Status: {response.status_code}")
+              print(f"Response: {response.text}")
+              print("=" * 60)
+              exit(1)
+          EOF
