@@ -1,6 +1,6 @@
 [project]
 name = "wndmngr-db"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
     "pyodbc>=5.2.0",
     "pandas>=2.3.3",

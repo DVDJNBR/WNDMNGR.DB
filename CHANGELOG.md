@@ -2,6 +2,21 @@
 
 
 
+## v1.1.0 (2025-12-16)
+
+### Feature
+
+* feat: test Supabase CLI for SQL execution
+
+- Install Supabase CLI in GitHub Actions
+- Test SQL file execution via CLI
+- Uses access token (not SQL ports) ([`c9328b5`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/c9328b52f35ec793b250d2a5e055abac28a9548f))
+
+### Unknown
+
+* Merge branch &#39;HTFX/SWITCH_TO_SUPABASE&#39; ([`82ce618`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/82ce6183890df8450498f8182cffbe20599d67a6))
+
+
 ## v1.0.0 (2025-12-16)
 
 ### Breaking
@@ -27,6 +42,8 @@ BREAKING CHANGE: Azure Functions-based ingestion replaced with GitHub Actions.
 All secrets must be configured in GitHub Secrets and local .env file. ([`84e2afe`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/84e2afe48fdc7277f8df5031525cead560080b93))
 
 ### Chore
+
+* chore(release): 1.0.0 [skip ci] ([`e11d37d`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/e11d37d407dcdea416a24e79f658303cec0207b6))
 
 * chore: deleted schema.txt ([`fac8cf9`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/fac8cf95e444c14ffc54e6640dbd825558afc1d2))
 
