@@ -2,7 +2,22 @@
 
 
 
+## v1.5.0 (2025-12-16)
+
+### Feature
+
+* feat: add Supabase tasks + update data source to 2025.12.09
+
+- tasks.py: add supabase-setup-db and supabase-full-setup tasks
+- _01_raw_to_bronze.py: use new PDF 2025.12.09 instead of 2025.11.06
+- Uses GitHub API to trigger workflows (no CLI needed) ([`2582806`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/25828061bad1bbbc78ebbbd866374bc793885b0a))
+
+
 ## v1.4.0 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.4.0 [skip ci] ([`0f84e42`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/0f84e4228da895fa0b9d8e5b978869b3a57a1e6e))
 
 ### Feature
 
