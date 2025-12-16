@@ -2,7 +2,28 @@
 
 
 
+## v1.2.0 (2025-12-16)
+
+### Feature
+
+* feat: test SQL file upload from repo to Storage via GitHub Actions ([`94a25bf`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/94a25bf20eb231922016210caa5bf719af7eee22))
+
+### Test
+
+* test: add storage upload workflow for cloud-to-cloud approach ([`298dead`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/298deadd0a60401b4a4beff0527f046195c9fa4f))
+
+### Unknown
+
+* Merge pull request #2 from DVDJNBR/HTFX/SWITCH_TO_SUPABASE
+
+test: add storage upload workflow for cloud-to-cloud approach ([`1d60912`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/1d60912022cabccb2953eaeecade6149e404877e))
+
+
 ## v1.1.1 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.1.1 [skip ci] ([`2e2ccd8`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/2e2ccd8f1ca57b756748521503d98dc43cd30ad1))
 
 ### Fix
 
