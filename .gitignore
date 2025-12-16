@@ -230,6 +230,10 @@ test_*.py
 diagnose_*.py
 supabase_client.py
 
+# T-SQL to PostgreSQL conversion (temporary)
+convert_tsql_to_postgres.py
+TABLES_BACKUP_MSSQL/
+
 # Azure Functions & Power Apps documentation (local guide)
 azurefunctions_powerapps/
 
