@@ -222,6 +222,14 @@ SCRIPTS/TESTS/DATA/*
 validate_*.ipynb
 test_*.ipynb
 
+# Temporary test files with secrets
+GITHUB_SECRETS_SETUP.md
+test_*.sql
+test_*.csv
+test_*.py
+diagnose_*.py
+supabase_client.py
+
 # Azure Functions & Power Apps documentation (local guide)
 azurefunctions_powerapps/
 
