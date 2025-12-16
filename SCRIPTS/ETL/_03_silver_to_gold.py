@@ -1,0 +1,1017 @@
+from pathlib import Path
+import pandas as pd
+from loguru import logger
+import uuid
+import os
+from dotenv import load_dotenv
+import unicodedata
+
+# Load environment variables
+load_dotenv()
+
+# Personnel codes (RGPD compliance)
+PERS_LCH = os.getenv('PERS_LCH')
+
+# Names to invert
+PERS_INVERTED_STR = os.getenv('PERS_INVERTED', '')
+PERS_INVERTED = [name.strip() for name in PERS_INVERTED_STR.split(',') if name.strip()]
+
+# Paths (absolute from repository root)
+root_path = Path(__file__).parent.parent.parent  # Go up to repo root
+silver_dir = root_path / 'DATA' / 'SILVER'
+gold_dir = root_path / 'DATA' / 'GOLD'
+gold_dir.mkdir(parents=True, exist_ok=True)
+
+###########################
+### REFERENCE TABLES ######
+###########################
+
+logger.info("Creating reference tables...")
+
+# Farm Types
+df_farm_types = pd.DataFrame({
+    'id': [1, 2, 3],
+    'type_title': ['Wind', 'Solar', 'Hybrid']
+})
+df_farm_types.to_csv(gold_dir / 'farm_types.csv', index=False)
+logger.success(f"farm_types: {len(df_farm_types)} rows")
+
+# Company Roles
+COMPANY_ROLES = sorted([
+    'Customer',
+    'Portfolio',
+    'Asset Manager',
+    'Legal Representative',
+    'Bank Domiciliation',
+    'Project Developer',
+    'Co-developer',
+    'WTG Service Provider',
+    'Substation Service Provider',
+    'Grid Operator',
+    'OM Main Service Company',
+    'OM Service Provider',
+    'Chartered Accountant',
+    'Legal Auditor',
+    'Energy Trader'
+])
+
+df_company_roles = pd.DataFrame({'role_name': COMPANY_ROLES})
+df_company_roles.insert(0, 'id', df_company_roles.index + 1)
+df_company_roles.to_csv(gold_dir / 'company_roles.csv', index=False)
+logger.success(f"company_roles: {len(df_company_roles)} rows")
+
+# Person Roles
+PERSON_ROLES = sorted([
+    'Head of Technical Management',
+    'Technical Manager',
+    'Substitute Technical Manager',
+    'HSE Coordination',
+    'Electrical Manager',
+    'Controller Responsible',
+    'Controller Deputy',
+    'Administrative responsible',
+    'Administrative Deputy',
+    'Control Room Operator',
+    'Field Crew Manager',
+    'Environmental Department Manager',
+    'Key Account Manager',
+    'Substitute Key Account Manager',
+    'Asset Manager',
+    'Legal Representative',
+    'Overseer',
+    'Commercial Controller'
+])
+
+df_person_roles = pd.DataFrame({'role_name': PERSON_ROLES})
+df_person_roles.insert(0, 'id', df_person_roles.index + 1)
+df_person_roles.to_csv(gold_dir / 'person_roles.csv', index=False)
+logger.success(f"person_roles: {len(df_person_roles)} rows")
+
+###########################
+### ENTITY TABLES #########
+###########################
+
+logger.info("Creating entity tables...")
+
+# Load source data
+df_repartition = pd.read_csv(silver_dir / 'repartition_sheet.csv', encoding='utf-8-sig')  # type: ignore
+df_database = pd.read_csv(silver_dir / 'database_sheet.csv', encoding='utf-8-sig')  # type: ignore
+
+# Step 1: Extract all persons (from repartition + legal representatives)
+person_columns = [
+    'technical_manager', 'substitute_technical_manager',
+    'key_account_manager', 'substitute_key_account_manager',
+    'electrical_manager', 'controller_responsible', 'controller_deputy',
+    'administrative_responsible', 'administrative_deputy'
+]
+
+all_persons = []
+for col in person_columns:
+    if col in df_repartition.columns:
+        all_persons.extend(df_repartition[col].dropna().unique())
+
+all_persons_series = pd.Series(all_persons).str.strip().replace('', pd.NA).dropna()
+persons_exploded = all_persons_series.str.split(r' \+ ', regex=True).explode().unique()
+
+# Add legal representative persons
+unique_legal_reps = df_database['legal_representative'].dropna().unique()
+legal_rep_companies = [rep for rep in unique_legal_reps if rep != '' and any(kw in rep.lower() for kw in ['gestion', 'actifs', 'sas', 'sarl'])]
+legal_rep_persons = [rep for rep in unique_legal_reps if rep != '' and len(rep.split()) == 2 and rep not in legal_rep_companies]
+
+# Extract persons from database_sheet columns (control room, field crew, HSE, overseer, commercial controller)
+database_person_columns = ['control_room_l1', 'field_crew', 'hse_coordination', 'overseer', 'commercial_controller', 'substitute_commercial_controller']
+company_keywords = ['société', 'statkraft', 'seris', 'loire', 'france', 'sas', 'sarl', 'gestion', 'securite', 'securitas']
+
+database_persons = []
+for col in database_person_columns:
+    if col in df_database.columns:
+        unique_values = df_database[col].dropna().unique()
+        for val in unique_values:
+            val_str = str(val).strip()
+            # Filter out empty strings and companies using keywords
+            if val_str != '' and not any(kw in val_str.lower() for kw in company_keywords):
+                database_persons.append(val_str)
+
+all_persons_list = list(persons_exploded) + legal_rep_persons + database_persons
+
+df_persons = pd.DataFrame({'full_name': all_persons_list})
+df_persons = df_persons[df_persons['full_name'] != ''].drop_duplicates().reset_index(drop=True)
+
+# Step 3: Split first_name / last_name with particle detection
+particles = ['le', 'la', 'de', 'du', 'el', 'van', 'von', 'mc', 'mac']  # lowercase for case-insensitive matching
+def split_name(full_name):
+    parts = (str(full_name) if full_name else "").split()
+    if len(parts) < 2:
+        return parts[0] if parts else '', ''
+    # Check if second-to-last word is a particle (case-insensitive)
+    if len(parts) >= 3 and parts[-2].lower() in particles:
+        return ' '.join(parts[:-2]), ' '.join(parts[-2:])
+    # Default: last word is last_name
+    return ' '.join(parts[:-1]), parts[-1]
+
+df_persons[['first_name', 'last_name']] = df_persons['full_name'].apply(
+    lambda x: pd.Series(split_name(x))
+)
+
+# Add hyphens to compound first names (if 2+ words without hyphen)
+df_persons['first_name'] = df_persons['first_name'].map(
+    lambda x: str(x).replace(' ', '-') if pd.notna(x) and ' ' in str(x) and '-' not in str(x) else x
+)
+
+df_persons = df_persons[['first_name', 'last_name']]
+
+# Step 2: Extract all companies (customers + legal representatives + portfolio + asset manager + developers + service companies + auditors + traders + grid + banks)
+unique_customers = df_database['customer'].dropna().unique()
+unique_portfolios = df_database['portfolio_name'].dropna().unique()
+unique_asset_managers = df_database['asset_manager'].dropna().unique()
+unique_project_developers = df_database['project_developer'].dropna().unique()
+unique_co_developers = df_database['co_developper'].dropna().unique()
+unique_main_service = df_database['main_service_company'].dropna().unique()
+unique_service_providers = df_database['service_provider'].dropna().unique()
+unique_chartered_accountants = df_database['expert_comptable_chartered_accountant'].dropna().unique()
+unique_legal_auditors = df_database['commissaire_aux_comptes_legal_auditor'].dropna().unique()
+unique_energy_traders = df_database['energy_trader'].dropna().unique()
+unique_substation_service = df_database['transfer_station_power_station_service_company'].dropna().unique()
+unique_grid_operators = df_database['grid_operator'].dropna().unique()
+unique_bank_domiciliation = df_database['bank_domiciliation'].dropna().unique()
+unique_wtg_service = df_database['wec_service_company'].dropna().unique()
+
+all_companies_list = (
+    list(unique_customers) +
+    legal_rep_companies +
+    list(unique_portfolios) +
+    list(unique_asset_managers) +
+    list(unique_project_developers) +
+    list(unique_co_developers) +
+    list(unique_main_service) +
+    list(unique_service_providers) +
+    list(unique_chartered_accountants) +
+    list(unique_legal_auditors) +
+    list(unique_energy_traders) +
+    list(unique_substation_service) +
+    list(unique_grid_operators) +
+    list(unique_bank_domiciliation) +
+    list(unique_wtg_service)
+)
+
+df_companies = pd.DataFrame({'name': all_companies_list})
+df_companies = (
+    df_companies[df_companies['name'] != '']
+    .drop_duplicates()
+    .reset_index(drop=True)
+)
+
+# Step 3: Extract farms
+df_farms = (
+    df_repartition[['spv', 'project', 'code', 'farm_type']]
+    .drop_duplicates()
+    .reset_index(drop=True)
+    .merge(df_farm_types, left_on='farm_type', right_on='type_title', how='left')
+    .drop(['type_title', 'farm_type'], axis=1)
+    .rename(columns={'id': 'farm_type_id'})
+)
+
+# Step 4: Add UUIDs to all entities
+df_persons.insert(0, 'uuid', [str(uuid.uuid4()) for _ in range(len(df_persons))])
+df_companies.insert(0, 'uuid', [str(uuid.uuid4()) for _ in range(len(df_companies))])
+df_farms.insert(0, 'uuid', [str(uuid.uuid4()) for _ in range(len(df_farms))])
+
+# Step 5: Save entity tables
+df_persons.to_csv(gold_dir / 'persons.csv', index=False)
+df_companies.to_csv(gold_dir / 'companies.csv', index=False)
+df_farms.to_csv(gold_dir / 'farms.csv', index=False)
+
+logger.success(f"persons: {len(df_persons)} rows")
+logger.success(f"companies: {len(df_companies)} rows")
+logger.success(f"farms: {len(df_farms)} rows")
+
+###########################
+### RELATIONSHIP TABLES ###
+###########################
+
+logger.info("Creating relationship tables...")
+
+# Create lookups for farm_referents
+person_lookup = df_persons.set_index(['first_name', 'last_name'])['uuid'].to_dict()
+role_lookup = df_person_roles.set_index('role_name')['id'].to_dict()
+farm_lookup = df_farms.set_index('code')['uuid'].to_dict()
+
+def get_person_uuid(full_name):
+    if pd.isna(full_name) or full_name == '':
+        return None
+    parts = str(full_name).split()
+    if len(parts) < 2:
+        return None
+    first_name, last_name = split_name(full_name)
+    return person_lookup.get((first_name, last_name))
+
+# Map column names to role names
+column_to_role = {
+    'technical_manager': 'Technical Manager',
+    'substitute_technical_manager': 'Substitute Technical Manager',
+    'key_account_manager': 'Key Account Manager',
+    'substitute_key_account_manager': 'Substitute Key Account Manager',
+    'electrical_manager': 'Electrical Manager',
+    'controller_responsible': 'Controller Responsible',
+    'controller_deputy': 'Controller Deputy',
+    'administrative_responsible': 'Administrative responsible',
+    'administrative_deputy': 'Administrative Deputy'
+}
+
+# Build farm_referents table
+referents_list = []
+
+for col_name, role_name in column_to_role.items():
+    if col_name in df_repartition.columns:
+        role_id = role_lookup.get(role_name)
+
+        for _, row in df_repartition.iterrows():
+            farm_uuid = farm_lookup.get(row['code'])
+            person_name = row[col_name]
+
+            if pd.notna(person_name) and person_name != '':
+                person_uuid = get_person_uuid(person_name)
+
+                if farm_uuid and person_uuid:
+                    referents_list.append({
+                        'farm_uuid': farm_uuid,
+                        'farm_code': row['code'],
+                        'person_role_id': role_id,
+                        'company_role_id': None,
+                        'person_uuid': person_uuid,
+                        'company_uuid': None
+                    })
+
+df_farm_referents = pd.DataFrame(referents_list).drop_duplicates()
+df_farm_referents.to_csv(gold_dir / 'farm_referents.csv', index=False)
+logger.success(f"farm_referents: {len(df_farm_referents)} rows")
+
+# Farm Company Roles - Link farms to companies with their roles
+# Create lookups
+company_lookup = df_companies.set_index('name')['uuid'].to_dict()
+company_role_lookup = df_company_roles.set_index('role_name')['id'].to_dict()
+
+# Match farm codes between database_sheet and farms
+# Use three_letter_code from database_sheet to match with code in farms
+farm_company_roles_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    customer_name = row['customer']
+
+    if pd.notna(farm_code) and pd.notna(customer_name) and customer_name != '':
+        farm_uuid = farm_lookup.get(farm_code)
+        company_uuid = company_lookup.get(customer_name)
+        # Get the "Customer" role ID
+        customer_role_id = company_role_lookup.get('Customer')
+
+        if farm_uuid and company_uuid and customer_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': company_uuid,
+                'company_role_id': customer_role_id
+            })
+
+    # Add legal representative (if company)
+    legal_rep = row['legal_representative']
+    if pd.notna(legal_rep) and legal_rep != '' and legal_rep in legal_rep_companies:
+        legal_rep_company_uuid = company_lookup.get(legal_rep)
+        legal_rep_role_id = company_role_lookup.get('Legal Representative')
+        if farm_uuid and legal_rep_company_uuid and legal_rep_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': legal_rep_company_uuid,
+                'company_role_id': legal_rep_role_id
+            })
+
+    # Add portfolio
+    portfolio = row['portfolio_name']
+    if pd.notna(portfolio) and portfolio != '':
+        portfolio_company_uuid = company_lookup.get(portfolio)
+        portfolio_role_id = company_role_lookup.get('Portfolio')
+        if farm_uuid and portfolio_company_uuid and portfolio_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': portfolio_company_uuid,
+                'company_role_id': portfolio_role_id
+            })
+
+    # Add asset manager
+    asset_manager = row['asset_manager']
+    if pd.notna(asset_manager) and asset_manager != '':
+        asset_manager_uuid = company_lookup.get(asset_manager)
+        asset_manager_role_id = company_role_lookup.get('Asset Manager')
+        if farm_uuid and asset_manager_uuid and asset_manager_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': asset_manager_uuid,
+                'company_role_id': asset_manager_role_id
+            })
+
+    # Add project developer
+    project_dev = row['project_developer']
+    if pd.notna(project_dev) and project_dev != '':
+        project_dev_uuid = company_lookup.get(project_dev)
+        project_dev_role_id = company_role_lookup.get('Project Developer')
+        if farm_uuid and project_dev_uuid and project_dev_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': project_dev_uuid,
+                'company_role_id': project_dev_role_id
+            })
+
+    # Add co-developer
+    co_dev = row['co_developper']
+    if pd.notna(co_dev) and co_dev != '':
+        co_dev_uuid = company_lookup.get(co_dev)
+        co_dev_role_id = company_role_lookup.get('Co-developer')
+        if farm_uuid and co_dev_uuid and co_dev_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': co_dev_uuid,
+                'company_role_id': co_dev_role_id
+            })
+
+    # Add main service company
+    main_service = row['main_service_company']
+    if pd.notna(main_service) and main_service != '':
+        main_service_uuid = company_lookup.get(main_service.strip())  # Strip to handle 'Enercon ' with trailing space
+        main_service_role_id = company_role_lookup.get('OM Main Service Company')
+        if farm_uuid and main_service_uuid and main_service_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': main_service_uuid,
+                'company_role_id': main_service_role_id
+            })
+
+    # Add service provider
+    service_prov = row['service_provider']
+    if pd.notna(service_prov) and service_prov != '':
+        service_prov_uuid = company_lookup.get(service_prov)
+        service_prov_role_id = company_role_lookup.get('OM Service Provider')
+        if farm_uuid and service_prov_uuid and service_prov_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': service_prov_uuid,
+                'company_role_id': service_prov_role_id
+            })
+
+    # Add chartered accountant
+    chartered_acc = row['expert_comptable_chartered_accountant']
+    if pd.notna(chartered_acc) and chartered_acc != '':
+        chartered_acc_uuid = company_lookup.get(chartered_acc)
+        chartered_acc_role_id = company_role_lookup.get('Chartered Accountant')
+        if farm_uuid and chartered_acc_uuid and chartered_acc_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': chartered_acc_uuid,
+                'company_role_id': chartered_acc_role_id
+            })
+
+    # Add legal auditor
+    legal_auditor = row['commissaire_aux_comptes_legal_auditor']
+    if pd.notna(legal_auditor) and legal_auditor != '':
+        legal_auditor_uuid = company_lookup.get(legal_auditor)
+        legal_auditor_role_id = company_role_lookup.get('Legal Auditor')
+        if farm_uuid and legal_auditor_uuid and legal_auditor_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': legal_auditor_uuid,
+                'company_role_id': legal_auditor_role_id
+            })
+
+    # Add energy trader
+    energy_trader = row['energy_trader']
+    if pd.notna(energy_trader) and energy_trader != '' and energy_trader.strip() != '':
+        energy_trader_uuid = company_lookup.get(energy_trader.strip())
+        energy_trader_role_id = company_role_lookup.get('Energy Trader')
+        if farm_uuid and energy_trader_uuid and energy_trader_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': energy_trader_uuid,
+                'company_role_id': energy_trader_role_id
+            })
+
+    # Add substation service provider
+    substation_service = row['transfer_station_power_station_service_company']
+    if pd.notna(substation_service) and substation_service != '':
+        substation_service_uuid = company_lookup.get(substation_service)
+        substation_service_role_id = company_role_lookup.get('Substation Service Provider')
+        if farm_uuid and substation_service_uuid and substation_service_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': substation_service_uuid,
+                'company_role_id': substation_service_role_id
+            })
+
+    # Add grid operator
+    grid_operator = row['grid_operator']
+    if pd.notna(grid_operator) and grid_operator != '' and grid_operator.strip() != '':
+        grid_operator_uuid = company_lookup.get(grid_operator.strip())
+        grid_operator_role_id = company_role_lookup.get('Grid Operator')
+        if farm_uuid and grid_operator_uuid and grid_operator_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': grid_operator_uuid,
+                'company_role_id': grid_operator_role_id
+            })
+
+    # Add bank domiciliation
+    bank_dom = row['bank_domiciliation']
+    if pd.notna(bank_dom) and bank_dom != '' and bank_dom.strip() != '':
+        bank_dom_uuid = company_lookup.get(bank_dom.strip())
+        bank_dom_role_id = company_role_lookup.get('Bank Domiciliation')
+        if farm_uuid and bank_dom_uuid and bank_dom_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': bank_dom_uuid,
+                'company_role_id': bank_dom_role_id
+            })
+
+    # Add WTG service provider
+    wtg_service = row['wec_service_company']
+    if pd.notna(wtg_service) and wtg_service != '':
+        wtg_service_uuid = company_lookup.get(wtg_service)
+        wtg_service_role_id = company_role_lookup.get('WTG Service Provider')
+        if farm_uuid and wtg_service_uuid and wtg_service_role_id:
+            farm_company_roles_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'company_uuid': wtg_service_uuid,
+                'company_role_id': wtg_service_role_id
+            })
+
+df_farm_company_roles = pd.DataFrame(farm_company_roles_list).drop_duplicates()
+df_farm_company_roles.to_csv(gold_dir / 'farm_company_roles.csv', index=False)
+logger.success(f"farm_company_roles: {len(df_farm_company_roles)} rows")
+
+# Add legal representative persons to farm_referents
+legal_rep_role_id = role_lookup.get('Legal Representative')
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    legal_rep = row['legal_representative']
+
+    if pd.notna(legal_rep) and legal_rep != '' and legal_rep in legal_rep_persons:
+        farm_uuid = farm_lookup.get(farm_code)
+        person_uuid = get_person_uuid(legal_rep)
+
+        if farm_uuid and person_uuid and legal_rep_role_id:
+            referents_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'person_role_id': legal_rep_role_id,
+                'company_role_id': None,
+                'person_uuid': person_uuid,
+                'company_uuid': None
+            })
+
+# Add database_sheet person columns to farm_referents
+database_column_to_role = {
+    'control_room_l1': 'Control Room Operator',
+    'field_crew': 'Field Crew Manager',
+    'hse_coordination': 'HSE Coordination',
+    'overseer': 'Overseer',
+    'commercial_controller': 'Commercial Controller',
+    'substitute_commercial_controller': 'Commercial Controller'
+}
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    for col_name, role_name in database_column_to_role.items():
+        if col_name in df_database.columns:
+            person_name = row[col_name]
+
+            if pd.notna(person_name) and person_name != '':
+                person_name_str = str(person_name).strip()
+                # Skip companies
+                if not any(kw in person_name_str.lower() for kw in company_keywords):
+                    person_uuid = get_person_uuid(person_name_str)
+                    role_id = role_lookup.get(role_name)
+
+                    if farm_uuid and person_uuid and role_id:
+                        referents_list.append({
+                            'farm_uuid': farm_uuid,
+                            'farm_code': farm_code,
+                            'person_role_id': role_id,
+                            'company_role_id': None,
+                            'person_uuid': person_uuid,
+                            'company_uuid': None
+                        })
+
+# Add Louis Chenel as "Head of Technical Management" for all farms
+louis_chenel_uuid = get_person_uuid(PERS_LCH)
+head_tech_mgmt_role_id = role_lookup.get('Head of Technical Management')
+
+if louis_chenel_uuid and head_tech_mgmt_role_id:
+    for farm_code, farm_uuid in farm_lookup.items():
+        referents_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'person_role_id': head_tech_mgmt_role_id,
+            'company_role_id': None,
+            'person_uuid': louis_chenel_uuid,
+            'company_uuid': None
+        })
+    logger.info(f"Added {PERS_LCH} as Head of Technical Management for all {len(farm_lookup)} farms")
+
+# Re-save farm_referents with all persons (legal reps + database_sheet persons + Louis Chenel)
+df_farm_referents = pd.DataFrame(referents_list).drop_duplicates()
+df_farm_referents.to_csv(gold_dir / 'farm_referents.csv', index=False)
+logger.success(f"farm_referents (updated with all persons): {len(df_farm_referents)} rows")
+
+###########################
+### LOOK UP TABLES ########
+###########################
+
+logger.info("Creating look-up tables...")
+
+# Farm Administrations
+farm_administrations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        # Map remit_subscription: "Yes" variants → 1 (True), else None
+        remit_value = row['remit_subscription']
+        has_remit = 1 if pd.notna(remit_value) and 'yes' in str(remit_value).lower() else None
+
+        # Convert SIRET to string (remove .0 if it's a float)
+        siret_value = ''
+        if pd.notna(row['siret']):
+            siret_value = str(int(float(row['siret']))) if isinstance(row['siret'], (int, float)) else str(row['siret'])
+
+        # Convert account_number to string (remove .0 if it's a float)
+        account_value = ''
+        if pd.notna(row['account_number']):
+            account_value = str(int(float(row['account_number']))) if isinstance(row['account_number'], (int, float)) else str(row['account_number'])
+
+        farm_administrations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'account_number': account_value,
+            'siret_number': siret_value,
+            'vat_number': row['vat_number'] if pd.notna(row['vat_number']) else '',
+            'head_office_address': row['head_office_address'] if pd.notna(row['head_office_address']) else '',
+            'legal_representative': row['legal_representative'] if pd.notna(row['legal_representative']) else '',
+            'has_remit_subscription': has_remit,
+            'financial_guarantee_amount': row['financial_guarantee_amount'] if pd.notna(row['financial_guarantee_amount']) else None,
+            'financial_guarantee_due_date': row['financial_guarantee_due_date'] if pd.notna(row['financial_guarantee_due_date']) else None,
+            'land_lease_payment_date': row['land_lease_payment_date'] if pd.notna(row['land_lease_payment_date']) else None,
+            'windmanager_subsidiary': row['windmanager_subsidiary'] if pd.notna(row['windmanager_subsidiary']) else ''
+        })
+
+df_farm_administrations = pd.DataFrame(farm_administrations_list).drop_duplicates()
+df_farm_administrations.to_csv(gold_dir / 'farm_administrations.csv', index=False)
+logger.success(f"farm_administrations: {len(df_farm_administrations)} rows")
+
+# Farm Environmental Installations (ICPE)
+farm_environmental_installations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_environmental_installations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'aip_number': row['aip_number'] if pd.notna(row['aip_number']) else None,
+            'duty_dreal_contact': row['duty_dreal_contact'] if pd.notna(row['duty_dreal_contact']) else None,
+            'prefecture_name': row['prefecture_name'] if pd.notna(row['prefecture_name']) else None,
+            'prefecture_address': row['prefecture_address'] if pd.notna(row['prefecture_address']) else None
+        })
+
+df_farm_environmental_installations = pd.DataFrame(farm_environmental_installations_list).drop_duplicates()
+df_farm_environmental_installations.to_csv(gold_dir / 'farm_environmental_installations.csv', index=False)
+logger.success(f"farm_environmental_installations: {len(df_farm_environmental_installations)} rows")
+
+# Farm Financial Guarantees
+farm_financial_guarantees_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_financial_guarantees_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'amount': row['financial_guarantee_amount'] if pd.notna(row['financial_guarantee_amount']) else None,
+            'due_date': row['financial_guarantee_due_date'] if pd.notna(row['financial_guarantee_due_date']) else None
+        })
+
+df_farm_financial_guarantees = pd.DataFrame(farm_financial_guarantees_list).drop_duplicates()
+df_farm_financial_guarantees.to_csv(gold_dir / 'farm_financial_guarantees.csv', index=False)
+logger.success(f"farm_financial_guarantees: {len(df_farm_financial_guarantees)} rows")
+
+# Farm Locations
+farm_locations_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_locations_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'map_reference': row['map_reference'] if pd.notna(row['map_reference']) else None,
+            'country': 'France',  # Fixed value for this database
+            'region': row['region'] if pd.notna(row['region']) else '',
+            'department': row['departement'] if pd.notna(row['departement']) else '',
+            'municipality': row['commune'] if pd.notna(row['commune']) else '',
+            'arras_round_trip_distance_km': row['km_ar_arras'] if pd.notna(row['km_ar_arras']) else None,
+            'vertou_round_trip_duration_h': row['temps_ar_vertou_en_h'] if pd.notna(row['temps_ar_vertou_en_h']) else None,
+            'arras_toll_eur': row['peages_arras'] if pd.notna(row['peages_arras']) else None,
+            'nantes_toll_eur': row['peages_nantes'] if pd.notna(row['peages_nantes']) else None
+        })
+
+df_farm_locations = pd.DataFrame(farm_locations_list).drop_duplicates()
+df_farm_locations.to_csv(gold_dir / 'farm_locations.csv', index=False)
+logger.success(f"farm_locations: {len(df_farm_locations)} rows")
+
+# Farm O&M Contracts
+farm_om_contracts_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_om_contracts_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'service_contract_type': row['service_contract_type'] if pd.notna(row['service_contract_type']) else '',
+            'contract_end_date': row['end_date_of_om_contract'] if pd.notna(row['end_date_of_om_contract']) else None
+        })
+
+df_farm_om_contracts = pd.DataFrame(farm_om_contracts_list).drop_duplicates()
+df_farm_om_contracts.to_csv(gold_dir / 'farm_om_contracts.csv', index=False)
+logger.success(f"farm_om_contracts: {len(df_farm_om_contracts)} rows")
+
+# Farm TCMA Contracts
+farm_tcma_contracts_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_tcma_contracts_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'wf_status': row['wf_status'] if pd.notna(row['wf_status']) else None,
+            'tcma_status': row['tcma_status'] if pd.notna(row['tcma_status']) else None,
+            'contract_type': row['contract_type'] if pd.notna(row['contract_type']) else None,
+            'signature_date': row['tcma_signature_date'] if pd.notna(row['tcma_signature_date']) else None,
+            'effective_date': row['tcma_entree_en_vigueur'] if pd.notna(row['tcma_entree_en_vigueur']) else None,
+            'beginning_of_remuneration': row['beginning_of_remuneration'] if pd.notna(row['beginning_of_remuneration']) else None,
+            'end_date': row['end_date_of_tcma'] if pd.notna(row['end_date_of_tcma']) else None,
+            'compensation_rate': row['tcma_compensation_rate'] if pd.notna(row['tcma_compensation_rate']) else None
+        })
+
+df_farm_tcma_contracts = pd.DataFrame(farm_tcma_contracts_list).drop_duplicates()
+df_farm_tcma_contracts.to_csv(gold_dir / 'farm_tcma_contracts.csv', index=False)
+logger.success(f"farm_tcma_contracts: {len(df_farm_tcma_contracts)} rows")
+
+# Farm Statuses
+farm_statuses_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        farm_statuses_list.append({
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'farm_status': row['wf_status'] if pd.notna(row['wf_status']) else '',
+            'tcma_status': row['tcma_status'] if pd.notna(row['tcma_status']) else ''
+        })
+
+df_farm_statuses = pd.DataFrame(farm_statuses_list).drop_duplicates()
+df_farm_statuses.to_csv(gold_dir / 'farm_statuses.csv', index=False)
+logger.success(f"farm_statuses: {len(df_farm_statuses)} rows")
+
+###########################
+### GRID DATA (SUBSTATIONS)
+###########################
+
+logger.info("Creating substations table from GRID data...")
+
+# Load GRID data
+df_grid = pd.read_csv(silver_dir / 'dbgrid_sheet.csv', encoding='utf-8-sig')
+
+substations_list = []
+
+for _, row in df_grid.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if farm_uuid:
+        substations_list.append({
+            'uuid': str(uuid.uuid4()),
+            'substation_name': row['nom_du_pdl'] if pd.notna(row['nom_du_pdl']) else '',
+            'farm_uuid': farm_uuid,
+            'farm_code': farm_code,
+            'gps_coordinates': row['coordonnees_gps'] if pd.notna(row['coordonnees_gps']) else None
+        })
+
+df_substations = pd.DataFrame(substations_list).drop_duplicates()
+df_substations.to_csv(gold_dir / 'substations.csv', index=False)
+logger.success(f"substations: {len(df_substations)} rows")
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FARM SUBSTATION DETAILS (Aggregated substation info per farm)
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating farm_substation_details...")
+
+substation_details_list = []
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if not farm_uuid:
+        continue
+
+    # Count substations for this farm
+    station_count = len(df_substations[df_substations['farm_code'] == farm_code])
+
+    # Get substation service company
+    substation_service_company = row['transfer_station_power_station_service_company']
+
+    if pd.notna(substation_service_company) and substation_service_company != '' and station_count > 0:
+        substation_service_company_uuid = company_lookup.get(substation_service_company)
+
+        if substation_service_company_uuid:
+            substation_details_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'station_count': station_count,
+                'substation_service_company_uuid': substation_service_company_uuid
+            })
+
+df_farm_substation_details = pd.DataFrame(substation_details_list).drop_duplicates()
+df_farm_substation_details.to_csv(gold_dir / 'farm_substation_details.csv', index=False)
+logger.success(f"farm_substation_details: {len(df_farm_substation_details)} rows")
+
+###########################
+### WTG DATA (WIND TURBINE GENERATORS)
+###########################
+
+logger.info("Creating wind turbine generators table from WTG data...")
+
+# Load WTG data
+df_wtg = pd.read_csv(silver_dir / 'dbwtg_sheet.csv', encoding='utf-8-sig')
+
+# Create substations lookup for WTG assignment
+substations_lookup = {}
+for _, sub in df_substations.iterrows():
+    farm_code = sub['farm_code']
+    if farm_code not in substations_lookup:
+        substations_lookup[farm_code] = sub['uuid']
+
+# Create wind turbine generators
+wtg_list = []
+
+for _, row in df_wtg.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+    substation_uuid = substations_lookup.get(farm_code)
+
+    if farm_uuid and substation_uuid:
+        serial_number = int(row['wtg_serial_number']) if pd.notna(row['wtg_serial_number']) else None
+
+        if serial_number:
+            manufacturer = row['manufacturer'] if pd.notna(row['manufacturer']) else None
+            wtg_type = row['wtg_type'] if pd.notna(row['wtg_type']) else None
+
+            # Handle COD date
+            cod = row['cod'] if pd.notna(row['cod']) else None
+            if cod:
+                try:
+                    cod = pd.to_datetime(cod).strftime('%Y-%m-%d')
+                except:
+                    cod = None
+            else:
+                cod = None
+
+            wtg_list.append({
+                'uuid': str(uuid.uuid4()),
+                'serial_number': serial_number,
+                'wtg_number': row['num_wtg'] if pd.notna(row['num_wtg']) else f'WTG-{serial_number}',
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'substation_uuid': substation_uuid,
+                'manufacturer': manufacturer,
+                'wtg_type': wtg_type,
+                'commercial_operation_date': cod
+            })
+
+df_wtg = pd.DataFrame(wtg_list).drop_duplicates()
+df_wtg.to_csv(gold_dir / 'wind_turbine_generators.csv', index=False)
+logger.success(f"wind_turbine_generators: {len(df_wtg)} rows")
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FARM TURBINE DETAILS (Aggregated per farm from WTG data)
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating farm_turbine_details...")
+
+# Load the original WTG data with all technical details
+df_wtg_full = pd.read_csv(silver_dir / 'dbwtg_sheet.csv', encoding='utf-8-sig')
+
+turbine_details_list = []
+
+for farm_code in df_wtg_full['three_letter_code'].unique():
+    farm_uuid = farm_lookup.get(farm_code)
+
+    if not farm_uuid:
+        continue
+
+    # Filter turbines for this farm
+    farm_turbines = df_wtg_full[df_wtg_full['three_letter_code'] == farm_code]
+
+    # Count turbines
+    turbine_count = len(farm_turbines)
+
+    # Get manufacturer (most common one if multiple)
+    manufacturer = farm_turbines['manufacturer'].mode()[0] if len(farm_turbines['manufacturer'].mode()) > 0 else None
+
+    # Calculate turbine age (from earliest COD to now)
+    cod_dates = pd.to_datetime(farm_turbines['cod'], errors='coerce').dropna()
+    if len(cod_dates) > 0:
+        earliest_cod = cod_dates.min()
+        turbine_age = (pd.Timestamp.now() - earliest_cod).days // 365
+    else:
+        turbine_age = 0
+
+    # Get supplier (using manufacturer as supplier for now)
+    supplier = manufacturer
+
+    # Calculate averages for technical specs (column names from SILVER have brackets)
+    hub_height = farm_turbines['hub_height_[m]'].mean() if 'hub_height_[m]' in farm_turbines.columns and farm_turbines['hub_height_[m]'].notna().any() else None
+    rotor_diameter = farm_turbines['rotor_diameter_[m]'].mean() if 'rotor_diameter_[m]' in farm_turbines.columns and farm_turbines['rotor_diameter_[m]'].notna().any() else None
+    tip_height = farm_turbines['tip_height_m_'].mean() if 'tip_height_m_' in farm_turbines.columns and farm_turbines['tip_height_m_'].notna().any() else None
+    rated_power = farm_turbines['rated_power_[mw]'].mean() if 'rated_power_[mw]' in farm_turbines.columns and farm_turbines['rated_power_[mw]'].notna().any() else None
+
+    # Calculate total MW (sum of all turbines)
+    total_mw = farm_turbines['rated_power_[mw]'].sum() if 'rated_power_[mw]' in farm_turbines.columns and farm_turbines['rated_power_[mw]'].notna().any() else None
+
+    # Get last TOC date if available
+    last_toc = None  # Not available in current data
+
+    # Get dismantling provision date if available
+    dismantling_provision_date = None  # Not available in current data
+
+    # Only add if we have required fields
+    if manufacturer and turbine_count > 0 and hub_height and rotor_diameter and tip_height and rated_power and total_mw:
+        turbine_details_list.append({
+            'wind_farm_uuid': farm_uuid,
+            'wind_farm_code': farm_code,
+            'turbine_count': turbine_count,
+            'manufacturer': manufacturer,
+            'turbine_age': turbine_age,
+            'supplier': supplier,
+            'hub_height_m': round(hub_height, 2),
+            'rotor_diameter_m': round(rotor_diameter, 2),
+            'tip_height_m': round(tip_height, 2),
+            'rated_power_installed_mw': round(rated_power, 2),
+            'total_mmw': round(total_mw, 2),
+            'last_toc': last_toc,
+            'dismantling_provision_date': dismantling_provision_date
+        })
+
+df_turbine_details = pd.DataFrame(turbine_details_list).drop_duplicates()
+df_turbine_details.to_csv(gold_dir / 'farm_turbine_details.csv', index=False)
+logger.success(f"farm_turbine_details: {len(df_turbine_details)} rows")
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ICE DETECTION SYSTEMS
+# ═══════════════════════════════════════════════════════════════════════════
+logger.info("Creating ice detection systems...")
+
+# Parse ice detection system column
+ice_col = 'ice_detection_system_automatic_stop_yes_no_;_automatic_restart_yes_no'
+ice_systems_set = set()
+
+for _, row in df_database.iterrows():
+    ice_value = row[ice_col]
+    if pd.notna(ice_value) and ice_value != '':
+        ice_systems_set.add(ice_value)
+
+# Parse each system: "System Name (YES ; NO)"
+ice_systems_list = []
+
+for ice_str in ice_systems_set:
+    # Extract system name and flags
+    if '(' in ice_str and ')' in ice_str:
+        name = ice_str.split('(')[0].strip()
+        flags = ice_str.split('(')[1].split(')')[0]  # Get "YES ; NO" part
+
+        # Parse YES/NO flags
+        parts = [p.strip().upper() for p in flags.split(';')]
+        automatic_stop = 1 if len(parts) > 0 and parts[0] == 'YES' else 0
+        automatic_restart = 1 if len(parts) > 1 and parts[1] == 'YES' else 0
+
+        ice_systems_list.append({
+            'uuid': str(uuid.uuid4()),
+            'ids_name': name,
+            'automatic_stop': automatic_stop,
+            'automatic_restart': automatic_restart
+        })
+
+df_ice_systems = pd.DataFrame(ice_systems_list)
+df_ice_systems.to_csv(gold_dir / 'ice_detection_systems.csv', index=False)
+logger.success(f"ice_detection_systems: {len(df_ice_systems)} rows")
+
+# Create farm_ice_detection_systems (many-to-many relationship)
+farm_ice_systems_list = []
+
+# Create lookup: ice system string -> uuid
+ice_system_lookup = {}
+for _, sys in df_ice_systems.iterrows():
+    # Match by reconstructing the original format
+    for ice_str in ice_systems_set:
+        if sys['ids_name'] in ice_str:
+            ice_system_lookup[ice_str] = sys['uuid']
+            break
+
+for _, row in df_database.iterrows():
+    farm_code = row['three_letter_code']
+    farm_uuid = farm_lookup.get(farm_code)
+    ice_value = row[ice_col]
+
+    if farm_uuid and pd.notna(ice_value) and ice_value != '':
+        ice_system_uuid = ice_system_lookup.get(ice_value)
+
+        if ice_system_uuid:
+            farm_ice_systems_list.append({
+                'farm_uuid': farm_uuid,
+                'farm_code': farm_code,
+                'ice_detection_system_uuid': ice_system_uuid
+            })
+
+df_farm_ice_systems = pd.DataFrame(farm_ice_systems_list).drop_duplicates()
+df_farm_ice_systems.to_csv(gold_dir / 'farm_ice_detection_systems.csv', index=False)
+logger.success(f"farm_ice_detection_systems: {len(df_farm_ice_systems)} rows")
+
+logger.success("All GOLD tables created successfully (including GRID and WTG data)")

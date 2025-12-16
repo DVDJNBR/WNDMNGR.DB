@@ -1,0 +1,66 @@
+name: Load Database
+
+on:
+  # Manual trigger from any branch
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  load-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyodbc pandas loguru azure-storage-blob python-dotenv
+
+      - name: Install ODBC Driver for SQL Server
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+      - name: Load data to Azure SQL
+        env:
+          AZURE_SQL_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          echo "Loading data to Azure SQL database..."
+          python SCRIPTS/ETL/_06_load_data_github.py
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-logs-${{ github.run_id }}
+          path: |
+            *.log
+          retention-days: 7
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Database loaded successfully"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Database load failed"
+          echo "Check logs for details"

@@ -201,6 +201,10 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Claude Code
+#  Claude Code local settings and preferences
+.claude/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
@@ -208,6 +212,35 @@ __marimo__/
 
 
 install.py
+AZURE_FUNCTIONS/install.py
 
-DATABASES/france_172074/DATA/*
-DATABASES/france_172074/SCRIPTS/TESTS/DATA/*
+# ETL Data directories (generated files, not versioned)
+DATA/*
+SCRIPTS/TESTS/DATA/*
+
+# Validation notebooks (local testing only)
+validate_*.ipynb
+test_*.ipynb
+
+# Temporary test files with secrets
+GITHUB_SECRETS_SETUP.md
+test_*.sql
+test_*.csv
+test_*.py
+diagnose_*.py
+supabase_client.py
+
+# Azure Functions & Power Apps documentation (local guide)
+azurefunctions_powerapps/
+
+# Azure Functions local settings and secrets (deprecated)
+AZURE_FUNCTIONS/.env
+AZURE_FUNCTIONS/.env.azfunc
+AZURE_FUNCTIONS/local.settings.json
+AZURE_FUNCTIONS/.venv_azfunc/
+AZURE_FUNCTIONS/__pycache__/
+AZURE_FUNCTIONS/*/__pycache__/
+
+# GitHub Actions artifacts and logs
+*.log
+.github/workflows/*.log

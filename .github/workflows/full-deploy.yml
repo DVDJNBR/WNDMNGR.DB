@@ -1,0 +1,34 @@
+name: Full Deployment (Create Tables + Load Data)
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_recreate:
+        description: 'Force recreate tables (Drop & Create)'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  orchestrate-deployment:
+    name: Orchestrate Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Create Tables
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: create-tables.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          inputs: '{"force_recreate": "${{ inputs.force_recreate }}"}'
+          wait-for-completion: true
+          wait-for-completion-timeout: 10m
+          display-workflow-run-url: true
+
+      - name: Trigger Load Database
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: load-database.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          wait-for-completion: true
+          wait-for-completion-timeout: 30m
+          display-workflow-run-url: true
