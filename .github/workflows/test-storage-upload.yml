@@ -1,0 +1,118 @@
+name: Test Storage Upload
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install supabase
+
+      - name: Test Storage Upload
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+        run: |
+          python - <<'EOF'
+          import os
+          from supabase import create_client, Client
+
+          print("=" * 60)
+          print("TEST UPLOAD VERS SUPABASE STORAGE")
+          print("=" * 60)
+
+          url = os.getenv('SUPABASE_URL')
+          key = os.getenv('SUPABASE_API_KEY')
+
+          print(f"\nProject: {url}")
+
+          # Create client
+          supabase: Client = create_client(url, key)
+
+          # Create test SQL file
+          test_sql = """
+          CREATE TABLE IF NOT EXISTS test_from_github_actions (
+              id SERIAL PRIMARY KEY,
+              test_value TEXT,
+              created_at TIMESTAMP DEFAULT NOW()
+          );
+          """
+
+          with open('test_table.sql', 'w') as f:
+              f.write(test_sql)
+
+          print("\n[1] Uploading SQL file to Storage...")
+
+          try:
+              # Try to create bucket first (if not exists)
+              try:
+                  supabase.storage.create_bucket('sql-scripts', {'public': False})
+                  print("  ✓ Bucket 'sql-scripts' created")
+              except Exception as e:
+                  print(f"  ℹ Bucket might already exist: {str(e)[:100]}")
+
+              # Upload file
+              with open('test_table.sql', 'rb') as f:
+                  response = supabase.storage.from_('sql-scripts').upload(
+                      'test_table.sql',
+                      f,
+                      {'content-type': 'text/plain', 'upsert': 'true'}
+                  )
+
+              print("  ✓ File uploaded!")
+              print(f"  Response: {response}")
+
+              print("\n[2] Verifying upload...")
+
+              # List files in bucket
+              files = supabase.storage.from_('sql-scripts').list()
+              print(f"  ✓ Files in bucket: {files}")
+
+              # Download to verify
+              file_data = supabase.storage.from_('sql-scripts').download('test_table.sql')
+              content = file_data.decode('utf-8')
+              print(f"  ✓ Downloaded content ({len(content)} chars):")
+              print(f"  {content[:100]}...")
+
+              print("\n" + "=" * 60)
+              print("✅ SUCCESS!")
+              print("Storage upload fonctionne via HTTPS!")
+              print("On peut maintenant créer une Edge Function pour exécuter!")
+              print("=" * 60)
+
+          except Exception as e:
+              print("\n" + "=" * 60)
+              print("❌ ÉCHEC")
+              print(f"Erreur: {str(e)}")
+              print("=" * 60)
+              exit(1)
+          EOF
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Storage upload fonctionne!"
+          echo "Prochaine étape: créer Edge Function pour exécuter le SQL"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Storage upload ne fonctionne pas"
+          echo "L'API HTTPS est peut-être aussi bloquée"
