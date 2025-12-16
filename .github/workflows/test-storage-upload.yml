@@ -28,91 +28,87 @@ jobs:
       - name: Test Storage Upload
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python - <<'EOF'
           import os
+          from pathlib import Path
           from supabase import create_client, Client
 
           print("=" * 60)
-          print("TEST UPLOAD VERS SUPABASE STORAGE")
+          print("TEST UPLOAD SQL FILES → SUPABASE STORAGE")
           print("=" * 60)
 
           url = os.getenv('SUPABASE_URL')
-          key = os.getenv('SUPABASE_API_KEY')
+          key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+
+          if not url or not key:
+              print("❌ Missing credentials!")
+              exit(1)
 
           print(f"\nProject: {url}")
+          print("Using: Service Role Key (bypasses RLS)")
 
-          # Create client
+          # Create client with service role key
           supabase: Client = create_client(url, key)
 
-          # Create test SQL file
-          test_sql = """
-          CREATE TABLE IF NOT EXISTS test_from_github_actions (
-              id SERIAL PRIMARY KEY,
-              test_value TEXT,
-              created_at TIMESTAMP DEFAULT NOW()
-          );
-          """
+          print("\n[1] Reading SQL file from repo...")
 
-          with open('test_table.sql', 'w') as f:
-              f.write(test_sql)
+          # Read a real SQL file from TABLES/
+          sql_file = Path('TABLES/01_REFERENCES/company_roles.sql')
 
-          print("\n[1] Uploading SQL file to Storage...")
+          if not sql_file.exists():
+              print(f"❌ File not found: {sql_file}")
+              exit(1)
+
+          with open(sql_file, 'r', encoding='utf-8') as f:
+              sql_content = f.read()
+
+          print(f"  ✓ Read {sql_file.name} ({len(sql_content)} chars)")
+          print(f"  Preview: {sql_content[:100]}...")
+
+          print("\n[2] Uploading to Storage...")
 
           try:
-              # Try to create bucket first (if not exists)
-              try:
-                  supabase.storage.create_bucket('sql-scripts', {'public': False})
-                  print("  ✓ Bucket 'sql-scripts' created")
-              except Exception as e:
-                  print(f"  ℹ Bucket might already exist: {str(e)[:100]}")
-
-              # Upload file
-              with open('test_table.sql', 'rb') as f:
+              with open(sql_file, 'rb') as f:
                   response = supabase.storage.from_('sql-scripts').upload(
-                      'test_table.sql',
-                      f,
-                      {'content-type': 'text/plain', 'upsert': 'true'}
+                      path=f'01_REFERENCES/{sql_file.name}',
+                      file=f,
+                      file_options={'content-type': 'text/plain', 'upsert': 'true'}
                   )
 
-              print("  ✓ File uploaded!")
-              print(f"  Response: {response}")
+              print(f"  ✓ Uploaded to: 01_REFERENCES/{sql_file.name}")
 
-              print("\n[2] Verifying upload...")
+              print("\n[3] Verifying upload...")
 
               # List files in bucket
-              files = supabase.storage.from_('sql-scripts').list()
-              print(f"  ✓ Files in bucket: {files}")
+              files = supabase.storage.from_('sql-scripts').list('01_REFERENCES')
+              print(f"  ✓ Files in 01_REFERENCES/:")
+              for file in files:
+                  print(f"    - {file['name']}")
 
               # Download to verify
-              file_data = supabase.storage.from_('sql-scripts').download('test_table.sql')
-              content = file_data.decode('utf-8')
-              print(f"  ✓ Downloaded content ({len(content)} chars):")
-              print(f"  {content[:100]}...")
+              file_data = supabase.storage.from_('sql-scripts').download(f'01_REFERENCES/{sql_file.name}')
+              downloaded_content = file_data.decode('utf-8')
+
+              if downloaded_content == sql_content:
+                  print(f"  ✓ Content verified! ({len(downloaded_content)} chars)")
+              else:
+                  print("  ⚠ Content mismatch!")
 
               print("\n" + "=" * 60)
               print("✅ SUCCESS!")
-              print("Storage upload fonctionne via HTTPS!")
-              print("On peut maintenant créer une Edge Function pour exécuter!")
+              print("GitHub Actions → Supabase Storage fonctionne!")
+              print("Prochaine étape: Edge Function pour exécuter le SQL")
               print("=" * 60)
 
           except Exception as e:
               print("\n" + "=" * 60)
               print("❌ ÉCHEC")
               print(f"Erreur: {str(e)}")
+              import traceback
+              traceback.print_exc()
               print("=" * 60)
               exit(1)
           EOF
 
-      - name: Notify on success
-        if: success()
-        run: |
-          echo "✅ Storage upload fonctionne!"
-          echo "Prochaine étape: créer Edge Function pour exécuter le SQL"
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "❌ Storage upload ne fonctionne pas"
-          echo "L'API HTTPS est peut-être aussi bloquée"
