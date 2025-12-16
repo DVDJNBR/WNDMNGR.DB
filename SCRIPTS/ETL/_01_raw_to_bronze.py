@@ -9,7 +9,7 @@ DATABASE_EXCEL_PATH = Path("P:") / "windmanager" / "00_Share point general" / DA
 
 # Paths (absolute from repository root)
 root_path = Path(__file__).parent.parent.parent  # SCRIPTS/ETL/ -> root
-REPARTITION_PDF_PATH = root_path / 'DATA' / '2025.11.06_Répartition des parcs.pdf'
+REPARTITION_PDF_PATH = root_path / 'DATA' / '2025.12.09_Répartition des parcs.pdf'
 
 # Architecture Medallion
 BRONZE_DIR = root_path / 'DATA' / 'BRONZE'

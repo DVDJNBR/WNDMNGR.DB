@@ -337,6 +337,47 @@ def gh_deploy(c, force=False):
     logger.info("Monitor final status: python -m invoke gh-watch")
     logger.info("Or visit: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
 
+###########################
+### SUPABASE TASKS ########
+###########################
+
+@task
+def supabase_setup_db(c):
+    """Trigger GitHub Actions to create all tables in Supabase"""
+    logger.info("Triggering 'Setup Database' workflow (Supabase)...")
+
+    if _trigger_workflow('setup-database.yml'):
+        logger.success("✓ Workflow triggered!")
+        logger.info("Monitor: https://github.com/DVDJNBR/WNDMNGR.DB/actions/workflows/setup-database.yml")
+        logger.info("This will upload all SQL files and execute them via Edge Function")
+    else:
+        logger.error("✗ Failed to trigger workflow")
+
+@task(etl_pipeline)
+def supabase_full_setup(c):
+    """Complete Supabase setup: ETL → Setup DB → Load Data
+
+    Workflow:
+    1. ETL: Excel → BRONZE → SILVER → GOLD (local)
+    2. GitHub Actions: Upload SQL + Execute (create tables)
+    3. TODO: Load GOLD data via API
+    """
+    logger.info("=" * 80)
+    logger.info("SUPABASE FULL SETUP PIPELINE")
+    logger.info("=" * 80)
+
+    logger.success("✓ ETL completed (GOLD layer ready)")
+    logger.info("")
+    logger.info("Triggering database setup...")
+
+    supabase_setup_db(c)
+
+    logger.info("")
+    logger.info("=" * 80)
+    logger.success("✓ ETL + Database setup workflow triggered!")
+    logger.info("Wait for completion: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
+    logger.info("=" * 80)
+
 @task(etl_to_blob)
 def full_deploy(c, force=False):
     """Complete pipeline: ETL local → Upload blob → Deploy to Azure SQL
