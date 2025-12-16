@@ -2,7 +2,26 @@
 
 
 
+## v1.1.1 (2025-12-16)
+
+### Fix
+
+* fix: use psql instead of supabase db execute
+
+- supabase db execute doesn&#39;t support --file flag
+- use psql with direct connection string instead
+- install postgresql-client on Ubuntu runner ([`0712398`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/07123986e140541fad2d0dbc45d984b6ebd61d01))
+
+### Unknown
+
+* Merge branch &#39;HTFX/SWITCH_TO_SUPABASE&#39; ([`6d55f79`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/6d55f794a16ddd99fc5b36ad69332d1e18b8786c))
+
+
 ## v1.1.0 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.1.0 [skip ci] ([`a4d1040`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/a4d10402661ce02056a85314502728d9738449e2))
 
 ### Feature
 
