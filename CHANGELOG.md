@@ -2,7 +2,18 @@
 
 
 
+## v1.3.0 (2025-12-16)
+
+### Feature
+
+* feat: add Edge Function to execute SQL from Storage ([`23bcc59`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/23bcc59eb34e8770c990d0c65b08c03ea1f22842))
+
+
 ## v1.2.0 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.2.0 [skip ci] ([`79ac0b1`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/79ac0b1580f3e05f45282242be798d0263d29a44))
 
 ### Feature
 
