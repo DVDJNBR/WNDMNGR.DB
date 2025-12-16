@@ -1,12 +1,4 @@
-IF NOT EXISTS (
-    SELECT * 
-    FROM INFORMATION_SCHEMA.TABLES 
-    WHERE TABLE_SCHEMA = 'dbo' 
-    AND TABLE_NAME = 'companies'
-)
-BEGIN
-    CREATE TABLE dbo.companies (
-        uuid NVARCHAR(36) PRIMARY KEY,
-        name NVARCHAR(255) NOT NULL
-    );
-END
+CREATE TABLE IF NOT EXISTS public.companies (
+        uuid VARCHAR(36) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+    )

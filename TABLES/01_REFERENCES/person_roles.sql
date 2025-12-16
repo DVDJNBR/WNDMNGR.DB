@@ -1,20 +1,10 @@
-IF NOT EXISTS (
-    SELECT *
-    FROM INFORMATION_SCHEMA.TABLES
-    WHERE TABLE_SCHEMA = 'dbo'
-    AND TABLE_NAME = 'person_roles'
-)
-BEGIN
-    CREATE TABLE dbo.person_roles (
+CREATE TABLE IF NOT EXISTS public.person_roles (
         id INT PRIMARY KEY,
-        role_name NVARCHAR(50) NOT NULL UNIQUE
-    );
-END
+        role_name VARCHAR(50) NOT NULL UNIQUE
+    )
 
 -- Insert fixed reference values if not already present
-IF NOT EXISTS (SELECT * FROM dbo.person_roles)
-BEGIN
-    INSERT INTO dbo.person_roles (id, role_name) VALUES
+INSERT INTO public.person_roles (id, role_name) VALUES
         (1, 'Administrative Deputy'),
         (2, 'Administrative responsible'),
         (3, 'Asset Manager'),
@@ -32,5 +22,4 @@ BEGIN
         (15, 'Overseer'),
         (16, 'Substitute Key Account Manager'),
         (17, 'Substitute Technical Manager'),
-        (18, 'Technical Manager');
-END
+        (18, 'Technical Manager')

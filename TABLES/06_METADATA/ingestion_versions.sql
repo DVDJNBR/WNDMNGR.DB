@@ -3,10 +3,10 @@
 -- Description: Tracks data ingestion versions and metadata
 -- =============================================
 
-CREATE TABLE ingestion_versions (
-    id INT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS ingestion_versions (
+    id SERIAL PRIMARY KEY,
     version_number INT NOT NULL,
-    ingestion_date DATETIME NOT NULL DEFAULT GETDATE(),
+    ingestion_date DATETIME NOT NULL DEFAULT NOW(),
     ingestion_source VARCHAR(100) NOT NULL, -- 'github-actions', 'manual', etc.
     triggered_by VARCHAR(255), -- GitHub username, local user, etc.
     commit_sha VARCHAR(40), -- Git commit SHA if applicable
@@ -16,15 +16,15 @@ CREATE TABLE ingestion_versions (
     execution_time_seconds INT, -- Duration of ingestion
 
     -- Validation tests
-    validation_passed BIT, -- Overall validation result
-    test_silver_gold_reconciliation BIT, -- Silver to Gold row count match
-    test_uuid_integrity BIT, -- All UUIDs are valid and unique
-    test_foreign_keys BIT, -- All foreign key relationships valid
-    test_required_fields BIT, -- All required fields populated
-    validation_errors NVARCHAR(MAX), -- JSON array of validation errors
+    validation_passed BOOLEAN, -- Overall validation result
+    test_silver_gold_reconciliation BOOLEAN, -- Silver to Gold row count match
+    test_uuid_integrity BOOLEAN, -- All UUIDs are valid and unique
+    test_foreign_keys BOOLEAN, -- All foreign key relationships valid
+    test_required_fields BOOLEAN, -- All required fields populated
+    validation_errors VARCHAR(MAX), -- JSON array of validation errors
 
-    error_message NVARCHAR(MAX), -- Error details if failed
-    notes NVARCHAR(500), -- Optional notes
+    error_message VARCHAR(MAX), -- Error details if failed
+    notes VARCHAR(500), -- Optional notes
     CONSTRAINT UQ_ingestion_version UNIQUE (version_number)
 );
 

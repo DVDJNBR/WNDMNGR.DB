@@ -1,20 +1,10 @@
-IF NOT EXISTS (
-    SELECT *
-    FROM INFORMATION_SCHEMA.TABLES
-    WHERE TABLE_SCHEMA = 'dbo'
-    AND TABLE_NAME = 'company_roles'
-)
-BEGIN
-    CREATE TABLE dbo.company_roles (
+CREATE TABLE IF NOT EXISTS public.company_roles (
         id INT PRIMARY KEY,
-        role_name NVARCHAR(50) NOT NULL UNIQUE
-    );
-END
+        role_name VARCHAR(50) NOT NULL UNIQUE
+    )
 
 -- Insert fixed reference values if not already present
-IF NOT EXISTS (SELECT * FROM dbo.company_roles)
-BEGIN
-    INSERT INTO dbo.company_roles (id, role_name) VALUES
+INSERT INTO public.company_roles (id, role_name) VALUES
         (1, 'Asset Manager'),
         (2, 'Bank Domiciliation'),
         (3, 'Chartered Accountant'),
@@ -29,5 +19,4 @@ BEGIN
         (12, 'Portfolio'),
         (13, 'Project Developer'),
         (14, 'Substation Service Provider'),
-        (15, 'WTG Service Provider');
-END
+        (15, 'WTG Service Provider')
