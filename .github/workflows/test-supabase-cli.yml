@@ -45,8 +45,16 @@ jobs:
           SQL
 
           echo ""
-          echo "Executing SQL file..."
-          supabase db execute --file test_create_table.sql
+          echo "Installing psql..."
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+          # Build connection string
+          DB_URL="postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$PROJECT_REF.supabase.co:5432/postgres"
+
+          echo ""
+          echo "Creating table..."
+          psql "$DB_URL" -f test_create_table.sql
 
           echo "✓ Table created!"
 
@@ -58,7 +66,7 @@ jobs:
 
           echo ""
           echo "Inserting test data..."
-          supabase db execute --file test_insert.sql
+          psql "$DB_URL" -f test_insert.sql
 
           echo "✓ Data inserted!"
 
@@ -69,7 +77,7 @@ jobs:
 
           echo ""
           echo "Querying data..."
-          supabase db execute --file test_query.sql
+          psql "$DB_URL" -f test_query.sql
 
           echo "✓ Query executed!"
 
@@ -80,7 +88,7 @@ jobs:
 
           echo ""
           echo "Cleaning up..."
-          supabase db execute --file test_cleanup.sql
+          psql "$DB_URL" -f test_cleanup.sql
 
           echo "✓ Cleanup done!"
 
