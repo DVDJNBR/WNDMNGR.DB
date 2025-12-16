@@ -1,0 +1,105 @@
+name: Test Supabase CLI
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        run: |
+          # Install via official method
+          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
+          sudo mv supabase /usr/local/bin/
+          supabase --version
+
+      - name: Test SQL execution via CLI
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PROJECT_REF: egmwfzmjkpqjpzlcnqya
+        run: |
+          echo "=" >> "="*60
+          echo "TEST SUPABASE CLI - EXÉCUTION SQL"
+          echo "=" >> "="*60
+
+          # Link to project using access token
+          echo "Linking to Supabase project..."
+          supabase link --project-ref $PROJECT_REF --password "$SUPABASE_DB_PASSWORD"
+
+          echo "✓ Project linked!"
+
+          # Create test SQL file
+          cat > test_create_table.sql <<'SQL'
+          CREATE TABLE IF NOT EXISTS test_cli_table (
+              id SERIAL PRIMARY KEY,
+              test_value TEXT,
+              created_at TIMESTAMP DEFAULT NOW()
+          );
+          SQL
+
+          echo ""
+          echo "Executing SQL file..."
+          supabase db execute --file test_create_table.sql
+
+          echo "✓ Table created!"
+
+          # Insert test data
+          cat > test_insert.sql <<'SQL'
+          INSERT INTO test_cli_table (test_value)
+          VALUES ('Test from Supabase CLI in GitHub Actions');
+          SQL
+
+          echo ""
+          echo "Inserting test data..."
+          supabase db execute --file test_insert.sql
+
+          echo "✓ Data inserted!"
+
+          # Query data
+          cat > test_query.sql <<'SQL'
+          SELECT * FROM test_cli_table;
+          SQL
+
+          echo ""
+          echo "Querying data..."
+          supabase db execute --file test_query.sql
+
+          echo "✓ Query executed!"
+
+          # Cleanup
+          cat > test_cleanup.sql <<'SQL'
+          DROP TABLE IF EXISTS test_cli_table;
+          SQL
+
+          echo ""
+          echo "Cleaning up..."
+          supabase db execute --file test_cleanup.sql
+
+          echo "✓ Cleanup done!"
+
+          echo ""
+          echo "=" >> "="*60
+          echo "✅ SUCCESS! Supabase CLI fonctionne!"
+          echo "On peut exécuter les fichiers .sql via le CLI!"
+          echo "=" >> "="*60
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Supabase CLI fonctionne!"
+          echo "On peut maintenant créer un workflow pour:"
+          echo "  1. Exécuter tous les fichiers SQL de TABLES/"
+          echo "  2. Charger les données via l'API"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Le CLI Supabase ne fonctionne pas"
+          echo "Il faudra utiliser SQL Editor manuel"
