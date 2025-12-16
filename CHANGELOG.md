@@ -2,7 +2,33 @@
 
 
 
+## v1.4.0 (2025-12-16)
+
+### Feature
+
+* feat: convert all SQL files from T-SQL to PostgreSQL
+
+- 30 files converted (NVARCHAR→VARCHAR, dbo.→public., etc.)
+- Original T-SQL backed up in TABLES_BACKUP_MSSQL/ (gitignored)
+- Ready for Supabase PostgreSQL ([`797159e`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/797159e8083beeefe041db7b8e58a511c8769c26))
+
+* feat: add complete database setup workflow + trigger script
+
+- setup-database.yml: upload all SQL + execute via Edge Function
+- _03_setup_database.py: trigger workflow from ETL
+- Converted 30 SQL files from T-SQL to PostgreSQL
+- Backup originals in TABLES_BACKUP_MSSQL/ ([`1d782cc`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/1d782cc73d39b63d9b7383fb79000516205c4414))
+
+### Test
+
+* test: add workflow to test Edge Function execute-sql ([`49feea0`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/49feea05236b6ce4bd692a0dab6265b20d9faa98))
+
+
 ## v1.3.0 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.3.0 [skip ci] ([`47b6acb`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/47b6acbce4adc6a8fa49fe81da6271298cd8405c))
 
 ### Feature
 
