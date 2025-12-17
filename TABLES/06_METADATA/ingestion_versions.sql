@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS ingestion_versions (
     total_rows_inserted INT, -- Total rows across all tables
     execution_time_seconds INT, -- Duration of ingestion
 
+    -- GOLD layer tracking
+    gold_data_source_date DATE, -- Date from source file (e.g., 2025.12.09 from PDF)
+    gold_generation_timestamp TIMESTAMP, -- When GOLD layer was generated
+    gold_csv_count INT, -- Number of CSV files in GOLD layer
+
     -- Validation tests
     validation_passed BOOLEAN, -- Overall validation result
     test_silver_gold_reconciliation BOOLEAN, -- Silver to Gold row count match

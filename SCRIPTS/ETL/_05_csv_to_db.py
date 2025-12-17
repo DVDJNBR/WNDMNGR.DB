@@ -97,8 +97,9 @@ def load_table(table_name: str, csv_file: str, truncate: bool = False):
             logger.warning(f"  → Empty file, skipping")
             return True
 
-        # Convert NaN to None for proper NULL handling
-        df = df.where(pd.notnull(df), None)
+        # Replace Inf/-Inf and NaN with None (for proper NULL handling and JSON compliance)
+        import numpy as np
+        df = df.replace([np.inf, -np.inf, np.nan], None)
 
         # Convert to dict records
         records = df.to_dict('records')
