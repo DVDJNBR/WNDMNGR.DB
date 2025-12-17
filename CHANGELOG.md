@@ -2,7 +2,26 @@
 
 
 
+## v1.7.1 (2025-12-17)
+
+### Fix
+
+* fix: update _04_sql_to_db.py to use GitHub API
+
+- Replace GitHub CLI with GitHub API for workflow triggering
+- Add Windows console UTF-8 encoding fix
+- Use requests library with SSL verification disabled for corporate proxy
+
+Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`2b213ca`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/2b213cabfa84af3fa8ccd44f08e3c8d4d6c5d8a8))
+
+
 ## v1.7.0 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.7.0 [skip ci] ([`2cb46db`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/2cb46db96b32177d9f72ab7603b66f9168dedcfd))
 
 ### Feature
 
