@@ -2,7 +2,27 @@
 
 
 
+## v1.7.0 (2025-12-17)
+
+### Feature
+
+* feat: improve data loading architecture
+
+- Fix NaN/Inf handling in _05_csv_to_db.py with explicit numpy replacement
+- Remove INSERT statements from reference tables (farm_types, company_roles, person_roles)
+- All reference data now loaded from GOLD CSVs for consistency
+- Add GOLD version tracking fields to ingestion_versions table
+
+Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`db90385`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/db903851dadf07a051d333423456f2b125349094))
+
+
 ## v1.6.0 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.6.0 [skip ci] ([`9764d4f`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/9764d4f99f442500f86c3dbcbe34354cf8e72b72))
 
 ### Feature
 
