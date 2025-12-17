@@ -2,7 +2,22 @@
 
 
 
+## v1.5.1 (2025-12-17)
+
+### Fix
+
+* fix: add missing semicolons to all SQL statements
+
+- Fixed 28/30 SQL files (company_roles and ingestion_versions already correct)
+- All CREATE TABLE and INSERT statements now properly terminated
+- Ready for Supabase execution ([`9accc6d`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/9accc6dfe41bd27a3b6157a076b307a4ce2907de))
+
+
 ## v1.5.0 (2025-12-16)
+
+### Chore
+
+* chore(release): 1.5.0 [skip ci] ([`a68a036`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/a68a03663e9b95cd3f3464d6d40e17ad2d2ec33a))
 
 ### Feature
 
