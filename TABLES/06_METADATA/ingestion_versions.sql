@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS ingestion_versions (
     id SERIAL PRIMARY KEY,
     version_number INT NOT NULL,
-    ingestion_date DATETIME NOT NULL DEFAULT NOW(),
+    ingestion_date TIMESTAMP NOT NULL DEFAULT NOW(),
     ingestion_source VARCHAR(100) NOT NULL, -- 'github-actions', 'manual', etc.
     triggered_by VARCHAR(255), -- GitHub username, local user, etc.
     commit_sha VARCHAR(40), -- Git commit SHA if applicable
@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS ingestion_versions (
     test_uuid_integrity BOOLEAN, -- All UUIDs are valid and unique
     test_foreign_keys BOOLEAN, -- All foreign key relationships valid
     test_required_fields BOOLEAN, -- All required fields populated
-    validation_errors VARCHAR(MAX), -- JSON array of validation errors
+    validation_errors TEXT, -- JSON array of validation errors
 
-    error_message VARCHAR(MAX), -- Error details if failed
+    error_message TEXT, -- Error details if failed
     notes VARCHAR(500), -- Optional notes
     CONSTRAINT UQ_ingestion_version UNIQUE (version_number)
 );
@@ -33,9 +33,5 @@ CREATE INDEX IX_ingestion_versions_date ON ingestion_versions(ingestion_date DES
 CREATE INDEX IX_ingestion_versions_status ON ingestion_versions(status);
 CREATE INDEX IX_ingestion_versions_validation ON ingestion_versions(validation_passed);
 
--- Add helpful comment
-EXEC sp_addextendedproperty
-    @name = N'MS_Description',
-    @value = N'Tracks all data ingestion versions with metadata, validation results, and audit trail for rollback purposes',
-    @level0type = N'SCHEMA', @level0name = N'dbo',
-    @level1type = N'TABLE', @level1name = N'ingestion_versions';
+-- Add helpful comment (PostgreSQL syntax)
+COMMENT ON TABLE ingestion_versions IS 'Tracks all data ingestion versions with metadata, validation results, and audit trail for rollback purposes';
