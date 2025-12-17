@@ -2,82 +2,82 @@
 Setup Database - Trigger GitHub Actions workflow to create all tables
 Part of ETL pipeline: LOAD step (schema setup)
 """
-import subprocess
+import os
 import sys
-import time
-from pathlib import Path
+import subprocess
+import requests
+import urllib3
+from dotenv import load_dotenv
 
-def check_gh_cli():
-    """Check if GitHub CLI is installed"""
-    try:
-        subprocess.run(['gh', '--version'], capture_output=True, check=True)
-        return True
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        print("❌ GitHub CLI not found!")
-        print("Install: https://cli.github.com/")
-        return False
+# Disable SSL warnings (corporate proxy)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Load environment variables
+load_dotenv()
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+
+def _get_github_headers():
+    """Get GitHub API headers with authentication"""
+    token = os.getenv('GITHUB_TOKEN')
+    if not token:
+        print("X GitHub Token not found in .env file")
+        sys.exit(1)
+    return {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
 
 def trigger_setup_workflow():
-    """Trigger the setup-database.yml workflow via GitHub CLI"""
+    """Trigger the setup-database.yml workflow via GitHub API"""
 
     print("=" * 60)
-    print("ETL STEP 3: SETUP DATABASE (Create Tables)")
+    print("ETL STEP 4: SQL to DB (Setup database structure)")
     print("=" * 60)
     print()
 
-    if not check_gh_cli():
-        return False
+    owner = os.getenv('GITHUB_REPO_OWNER', 'DVDJNBR')
+    repo = os.getenv('GITHUB_REPO_NAME', 'WNDMNGR.DB')
 
-    print("[1] Triggering GitHub Actions workflow: setup-database.yml")
+    # Get current branch
+    try:
+        current_branch = subprocess.check_output(['git', 'branch', '--show-current'], text=True).strip()
+    except:
+        current_branch = 'main'
+
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/workflows/setup-database.yml/dispatches'
+
+    payload = {
+        'ref': current_branch,
+        'inputs': {}
+    }
+
+    print(f"Triggering workflow on branch: {current_branch}")
     print()
 
     try:
-        # Trigger workflow
-        result = subprocess.run(
-            ['gh', 'workflow', 'run', 'setup-database.yml'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        response = requests.post(url, json=payload, headers=_get_github_headers(), verify=False)
+        response.raise_for_status()
 
-        print("✓ Workflow triggered!")
+        print("✓ Workflow triggered successfully!")
         print()
         print("Monitor progress:")
-        print("  https://github.com/DVDJNBR/WNDMNGR.DB/actions/workflows/setup-database.yml")
-        print()
-        print("Or use: gh run watch")
-        print()
-
-        # Wait a bit then show status
-        print("Waiting 3 seconds...")
-        time.sleep(3)
-
-        print()
-        print("[2] Checking workflow status...")
-
-        status_result = subprocess.run(
-            ['gh', 'run', 'list', '--workflow=setup-database.yml', '--limit=1'],
-            capture_output=True,
-            text=True
-        )
-
-        print(status_result.stdout)
-
+        print(f"  https://github.com/{owner}/{repo}/actions/workflows/setup-database.yml")
         print()
         print("=" * 60)
         print("NEXT STEPS:")
         print("1. Wait for workflow to complete (~2-5 min)")
         print("2. Check results in GitHub Actions")
-        print("3. If successful, run _04_load_data.py to insert data")
+        print("3. If successful, run csv-to-db to load data")
         print("=" * 60)
         print()
 
         return True
 
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to trigger workflow!")
-        print(f"Error: {e.stderr}")
+    except requests.exceptions.RequestException as e:
+        print(f"X Failed to trigger workflow: {e}")
         return False
 
 
