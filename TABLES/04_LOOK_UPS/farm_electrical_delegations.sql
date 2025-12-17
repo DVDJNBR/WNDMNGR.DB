@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS public.farm_electrical_delegations (
         electrical_delegate_uuid VARCHAR(36) NOT NULL,
         CONSTRAINT fk_fed_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid),
         CONSTRAINT fk_fed_delegate FOREIGN KEY (electrical_delegate_uuid) REFERENCES public.companies(uuid)
-    )
+    );

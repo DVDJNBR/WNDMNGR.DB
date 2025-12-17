@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS public.farm_environmental_installations (
         prefecture_name VARCHAR(100),
         prefecture_address VARCHAR(255),
         CONSTRAINT fk_fenv_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

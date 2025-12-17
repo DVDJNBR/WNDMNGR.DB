@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS public.persons (
         email VARCHAR(255),
         mobile VARCHAR(20),
         person_type VARCHAR(50)
-    )
+    );

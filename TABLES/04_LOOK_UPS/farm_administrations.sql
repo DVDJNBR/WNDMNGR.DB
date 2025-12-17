@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS public.farm_administrations (
         land_lease_payment_date VARCHAR(50),
         windmanager_subsidiary VARCHAR(100) NOT NULL,
         CONSTRAINT fk_fadmin_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

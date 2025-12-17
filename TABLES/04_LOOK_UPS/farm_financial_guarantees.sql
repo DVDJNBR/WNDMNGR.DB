@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS public.farm_financial_guarantees (
         amount DECIMAL(15,2),
         due_date DATE,
         CONSTRAINT fk_ffg_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

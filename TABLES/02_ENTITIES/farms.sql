@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS public.farms (
         code VARCHAR(10) NOT NULL UNIQUE,
         farm_type_id INT NOT NULL,
         CONSTRAINT fk_farms_type FOREIGN KEY (farm_type_id) REFERENCES public.farm_types(id)
-    )
+    );

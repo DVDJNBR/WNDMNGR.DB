@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS public.person_roles (
         id INT PRIMARY KEY,
         role_name VARCHAR(50) NOT NULL UNIQUE
-    )
+    );
 
 -- Insert fixed reference values if not already present
 INSERT INTO public.person_roles (id, role_name) VALUES
@@ -22,4 +22,4 @@ INSERT INTO public.person_roles (id, role_name) VALUES
         (15, 'Overseer'),
         (16, 'Substitute Key Account Manager'),
         (17, 'Substitute Technical Manager'),
-        (18, 'Technical Manager')
+        (18, 'Technical Manager');

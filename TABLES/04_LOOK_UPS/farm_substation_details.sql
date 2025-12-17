@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS public.farm_substation_details (
         substation_service_company_uuid VARCHAR(36) NOT NULL,
         CONSTRAINT fk_fsd_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid),
         CONSTRAINT fk_fsd_company FOREIGN KEY (substation_service_company_uuid) REFERENCES public.companies(uuid)
-    )
+    );

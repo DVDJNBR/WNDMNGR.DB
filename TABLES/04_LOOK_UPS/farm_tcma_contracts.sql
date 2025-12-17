@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS public.farm_tcma_contracts (
         end_date DATE,
         compensation_rate DECIMAL(10,4),
         CONSTRAINT fk_tcma_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

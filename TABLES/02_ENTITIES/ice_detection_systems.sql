@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS public.ice_detection_systems (
         ids_name VARCHAR(100) NOT NULL,
         automatic_stop BOOLEAN NOT NULL,
         automatic_restart BOOLEAN NOT NULL
-    )
+    );

@@ -3,7 +3,7 @@ IF NOT EXISTS (
     FROM sys.foreign_keys 
     WHERE name = 'fk_employees_person' 
     AND parent_object_id = OBJECT_ID('public.employees')
-)
+);
 
     ALTER TABLE public.employees 
     ADD CONSTRAINT fk_employees_person 

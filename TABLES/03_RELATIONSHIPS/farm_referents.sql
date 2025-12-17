@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS public.farm_referents (
             (person_uuid IS NOT NULL AND person_role_id IS NOT NULL AND company_uuid IS NULL AND company_role_id IS NULL) OR
             (company_uuid IS NOT NULL AND company_role_id IS NOT NULL AND person_uuid IS NULL AND person_role_id IS NULL)
         )
-    )
+    );

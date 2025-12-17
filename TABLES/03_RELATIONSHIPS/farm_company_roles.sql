@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS public.farm_company_roles (
         CONSTRAINT fk_fcr_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid),
         CONSTRAINT fk_fcr_company FOREIGN KEY (company_uuid) REFERENCES public.companies(uuid),
         CONSTRAINT fk_fcr_role FOREIGN KEY (company_role_id) REFERENCES public.company_roles(id)
-    )
+    );

@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS public.employees (
         trigram VARCHAR(3) UNIQUE NOT NULL,
         landline INT,
         job_title VARCHAR(100) NOT NULL
-    )
+    );

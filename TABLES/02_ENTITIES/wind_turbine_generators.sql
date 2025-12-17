@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS public.wind_turbine_generators (
         manufacturer VARCHAR(100),
         wtg_type VARCHAR(50),
         commercial_operation_date DATE
-    )
+    );

@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS public.farm_om_contracts (
         service_contract_type VARCHAR(100),
         contract_end_date DATE,
         CONSTRAINT fk_fom_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

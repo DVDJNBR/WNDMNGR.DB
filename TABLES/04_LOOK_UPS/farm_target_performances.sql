@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS public.farm_target_performances (
         amount DECIMAL(15,2) NOT NULL,
         PRIMARY KEY (farm_uuid, year),
         CONSTRAINT fk_ftp_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS public.farm_locations (
         arras_toll_eur DECIMAL(10,2),
         nantes_toll_eur DECIMAL(10,2),
         CONSTRAINT fk_floc_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

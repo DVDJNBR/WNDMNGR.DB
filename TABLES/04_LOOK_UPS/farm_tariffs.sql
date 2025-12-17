@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS public.farm_tariffs (
         quantity DECIMAL(10,2),
         vppa_tariff_per_mwh DECIMAL(10,2),
         CONSTRAINT fk_ftariffs_farm FOREIGN KEY (farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );

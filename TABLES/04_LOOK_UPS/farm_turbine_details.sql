@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS public.farm_turbine_details (
         last_toc DATE,
         dismantling_provision_date DATE,
         CONSTRAINT fk_ftd_farm FOREIGN KEY (wind_farm_uuid) REFERENCES public.farms(uuid)
-    )
+    );
