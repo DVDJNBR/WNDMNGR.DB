@@ -2,7 +2,32 @@
 
 
 
+## v1.6.0 (2025-12-17)
+
+### Feature
+
+* feat: reorganize ETL pipeline with clear step numbering
+
+New structure:
+- _01_raw_to_bronze.py (Extract)
+- _02_bronze_to_silver.py (Clean)
+- _03_silver_to_gold.py (Transform)
+- _04_sql_to_db.py (Setup structure via GitHub Actions)
+- _05_csv_to_db.py (Load data via API)
+
+Changes:
+- Renamed _03_setup_database.py -&gt; _04_sql_to_db.py
+- Created _05_csv_to_db.py for data loading
+- Archived old Azure scripts to ARCHIVED_AZURE/
+- Updated tasks.py with new task names (sql-to-db, csv-to-db, supabase-full)
+- Updated .gitignore ([`6131cfe`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/6131cfe8b75ab86cb75c4825f9654a122807513d))
+
+
 ## v1.5.2 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.5.2 [skip ci] ([`9fcf431`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/9fcf431d181341c8ef774eb89b965921fdd52cab))
 
 ### Fix
 
