@@ -2,7 +2,27 @@
 
 
 
+## v1.7.2 (2025-12-17)
+
+### Fix
+
+* fix: add httpx SSL workaround to _05_csv_to_db.py
+
+- Add httpx client with SSL verification disabled for corporate proxy
+- Patch Supabase PostgREST session with custom httpx client
+- Remove non-existent tables from LOAD_ORDER (farm_tariffs, farm_actual_performances, etc.)
+- Data loading now works successfully with all 21 available CSV files
+
+Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`50ba35e`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/50ba35e24e945ad776b787f2b1592e2f723d7a2b))
+
+
 ## v1.7.1 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.7.1 [skip ci] ([`f874bd9`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/f874bd952fb9d989ea24d3400be72d50bf626404))
 
 ### Fix
 
