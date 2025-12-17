@@ -2,7 +2,22 @@
 
 
 
+## v1.5.2 (2025-12-17)
+
+### Fix
+
+* fix: convert ingestion_versions.sql to PostgreSQL syntax
+
+- DATETIME → TIMESTAMP
+- VARCHAR(MAX) → TEXT
+- EXEC sp_addextendedproperty → COMMENT ON TABLE ([`c313f4d`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/c313f4d050a43b89722a042fc88c71c67f686bec))
+
+
 ## v1.5.1 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.5.1 [skip ci] ([`b010820`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/b010820a93d20dbc2f2943846322f760daf5163f))
 
 ### Fix
 
