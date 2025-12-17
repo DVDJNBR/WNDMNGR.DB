@@ -248,3 +248,5 @@ AZURE_FUNCTIONS/*/__pycache__/
 # GitHub Actions artifacts and logs
 *.log
 .github/workflows/*.log
+# Archived Azure scripts
+SCRIPTS/ETL/ARCHIVED_AZURE/

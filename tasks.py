@@ -342,40 +342,50 @@ def gh_deploy(c, force=False):
 ###########################
 
 @task
-def supabase_setup_db(c):
-    """Trigger GitHub Actions to create all tables in Supabase"""
-    logger.info("Triggering 'Setup Database' workflow (Supabase)...")
+def sql_to_db(c):
+    """ETL Step 4: SQL to DB (Trigger GitHub Actions to setup database structure)"""
+    logger.info("ETL STEP 4: SQL to DB (Setup database structure)")
+    c.run(f"python {Path('SCRIPTS/ETL') / '_04_sql_to_db.py'}")
 
-    if _trigger_workflow('setup-database.yml'):
-        logger.success("✓ Workflow triggered!")
-        logger.info("Monitor: https://github.com/DVDJNBR/WNDMNGR.DB/actions/workflows/setup-database.yml")
-        logger.info("This will upload all SQL files and execute them via Edge Function")
-    else:
-        logger.error("✗ Failed to trigger workflow")
+@task
+def csv_to_db(c, truncate=False):
+    """ETL Step 5: CSV to DB (Load GOLD data to Supabase)"""
+    logger.info("ETL STEP 5: CSV to DB (Load data)")
+    cmd = f"python {Path('SCRIPTS/ETL') / '_05_csv_to_db.py'}"
+    if truncate:
+        cmd += " --truncate"
+    c.run(cmd)
 
-@task(etl_pipeline)
-def supabase_full_setup(c):
-    """Complete Supabase setup: ETL → Setup DB → Load Data
+@task(raw_to_bronze, bronze_to_silver, silver_to_gold)
+def etl_to_gold(c):
+    """Run ETL pipeline to GOLD layer (no database operations)"""
+    logger.success("[OK] ETL pipeline to GOLD complete!")
+
+@task(etl_to_gold, sql_to_db)
+def supabase_setup(c):
+    """Complete Supabase setup: ETL to GOLD then SQL to DB (structure only)
 
     Workflow:
-    1. ETL: Excel → BRONZE → SILVER → GOLD (local)
+    1. ETL: Excel to BRONZE to SILVER to GOLD (local)
     2. GitHub Actions: Upload SQL + Execute (create tables)
-    3. TODO: Load GOLD data via API
     """
     logger.info("=" * 80)
-    logger.info("SUPABASE FULL SETUP PIPELINE")
+    logger.success("ETL + Database structure setup complete!")
+    logger.info("Next: Run 'invoke csv-to-db' to load data")
     logger.info("=" * 80)
 
-    logger.success("✓ ETL completed (GOLD layer ready)")
-    logger.info("")
-    logger.info("Triggering database setup...")
+@task(etl_to_gold, sql_to_db, csv_to_db)
+def supabase_full(c):
+    """Complete Supabase pipeline: ETL to GOLD then SQL and CSV to DB
 
-    supabase_setup_db(c)
-
-    logger.info("")
+    Full workflow:
+    1. ETL: Excel to BRONZE to SILVER to GOLD (local)
+    2. SQL to DB: Setup structure (GitHub Actions)
+    3. CSV to DB: Load data (Supabase API)
+    """
     logger.info("=" * 80)
-    logger.success("✓ ETL + Database setup workflow triggered!")
-    logger.info("Wait for completion: https://github.com/DVDJNBR/WNDMNGR.DB/actions")
+    logger.success("COMPLETE SUPABASE PIPELINE DONE!")
+    logger.success("Structure created + Data loaded")
     logger.info("=" * 80)
 
 @task(etl_to_blob)

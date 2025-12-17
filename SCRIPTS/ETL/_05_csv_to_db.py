@@ -1,0 +1,183 @@
+"""
+Load data from GOLD layer to Supabase database via API
+Part of ETL pipeline: LOAD step (CSV → DB)
+"""
+import os
+import sys
+from pathlib import Path
+import pandas as pd
+from dotenv import load_dotenv
+from supabase import create_client, Client
+from loguru import logger
+import ssl
+import urllib3
+
+# Disable SSL warnings for corporate proxy
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# Load environment
+load_dotenv()
+
+# Paths
+BASE_DIR = Path(__file__).parent.parent.parent
+GOLD_DIR = BASE_DIR / 'DATA' / 'GOLD'
+
+# Supabase credentials
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_API_KEY')
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    logger.error("Missing SUPABASE_URL or SUPABASE_API_KEY in .env")
+    sys.exit(1)
+
+# Create Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Load order (respects foreign key dependencies)
+LOAD_ORDER = [
+    # References (no dependencies)
+    ('farm_types', 'farm_types.csv'),
+    ('company_roles', 'company_roles.csv'),
+    ('person_roles', 'person_roles.csv'),
+
+    # Entities (no dependencies)
+    ('companies', 'companies.csv'),
+    ('persons', 'persons.csv'),
+    ('ice_detection_systems', 'ice_detection_systems.csv'),
+
+    # Farms (no dependencies)
+    ('farms', 'farms.csv'),
+
+    # WTG and Substations (depend on farms)
+    ('wind_turbine_generators', 'wind_turbine_generators.csv'),
+    ('substations', 'substations.csv'),
+
+    # Employees (depend on companies and persons)
+    ('employees', 'employees.csv'),
+
+    # Relationships (depend on farms, companies, persons)
+    ('farm_company_roles', 'farm_company_roles.csv'),
+    ('farm_referents', 'farm_referents.csv'),
+
+    # Lookups (all depend on farms)
+    ('farm_administrations', 'farm_administrations.csv'),
+    ('farm_environmental_installations', 'farm_environmental_installations.csv'),
+    ('farm_financial_guarantees', 'farm_financial_guarantees.csv'),
+    ('farm_locations', 'farm_locations.csv'),
+    ('farm_om_contracts', 'farm_om_contracts.csv'),
+    ('farm_tcma_contracts', 'farm_tcma_contracts.csv'),
+    ('farm_statuses', 'farm_statuses.csv'),
+    ('farm_substation_details', 'farm_substation_details.csv'),
+    ('farm_turbine_details', 'farm_turbine_details.csv'),
+    ('farm_ice_detection_systems', 'farm_ice_detection_systems.csv'),
+    ('farm_tariffs', 'farm_tariffs.csv'),
+    ('farm_actual_performances', 'farm_actual_performances.csv'),
+    ('farm_target_performances', 'farm_target_performances.csv'),
+    ('farm_electrical_delegations', 'farm_electrical_delegations.csv'),
+]
+
+
+def load_table(table_name: str, csv_file: str, truncate: bool = False):
+    """Load a CSV file into a Supabase table"""
+
+    csv_path = GOLD_DIR / csv_file
+
+    if not csv_path.exists():
+        logger.warning(f"File not found: {csv_file}")
+        return False
+
+    logger.info(f"Loading {table_name}...")
+
+    try:
+        # Read CSV
+        df = pd.read_csv(csv_path)
+
+        if df.empty:
+            logger.warning(f"  → Empty file, skipping")
+            return True
+
+        # Convert NaN to None for proper NULL handling
+        df = df.where(pd.notnull(df), None)
+
+        # Convert to dict records
+        records = df.to_dict('records')
+
+        logger.info(f"  → {len(records)} rows to insert")
+
+        # Truncate if requested
+        if truncate:
+            logger.warning(f"  → Truncating {table_name}")
+            supabase.table(table_name).delete().neq('id', -1).execute()
+
+        # Insert in batches (Supabase API has limits)
+        batch_size = 1000
+        total_inserted = 0
+
+        for i in range(0, len(records), batch_size):
+            batch = records[i:i + batch_size]
+
+            try:
+                response = supabase.table(table_name).upsert(batch).execute()
+                total_inserted += len(batch)
+                logger.info(f"  → Batch {i // batch_size + 1}: {len(batch)} rows")
+            except Exception as e:
+                logger.error(f"  → Batch error: {str(e)[:200]}")
+                # Continue with next batch
+
+        logger.success(f"  ✓ {table_name}: {total_inserted} rows loaded")
+        return True
+
+    except Exception as e:
+        logger.error(f"  ✗ Error loading {table_name}: {str(e)[:200]}")
+        return False
+
+
+def main(truncate: bool = False):
+    """Load all GOLD data to Supabase"""
+
+    logger.info("=" * 80)
+    logger.info("ETL STEP 5: CSV → DB (Load GOLD data to Supabase)")
+    logger.info("=" * 80)
+    logger.info(f"Mode: {'TRUNCATE + RELOAD' if truncate else 'UPSERT (safe)'}")
+    logger.info(f"Tables to load: {len(LOAD_ORDER)}")
+    logger.info("")
+
+    success_count = 0
+    failed_count = 0
+
+    for table_name, csv_file in LOAD_ORDER:
+        if load_table(table_name, csv_file, truncate):
+            success_count += 1
+        else:
+            failed_count += 1
+
+    logger.info("")
+    logger.info("=" * 80)
+    logger.info("LOAD COMPLETE")
+    logger.info("=" * 80)
+    logger.info(f"✓ Success: {success_count}/{len(LOAD_ORDER)}")
+    logger.info(f"✗ Failed: {failed_count}/{len(LOAD_ORDER)}")
+    logger.info("=" * 80)
+
+    if failed_count > 0:
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Load GOLD data to Supabase')
+    parser.add_argument('--truncate', action='store_true',
+                       help='Truncate tables before loading (DANGEROUS)')
+
+    args = parser.parse_args()
+
+    if args.truncate:
+        logger.warning("⚠ TRUNCATE mode enabled - all data will be deleted!")
+        response = input("Continue? (yes/no): ")
+        if response.lower() != 'yes':
+            logger.info("Aborted")
+            sys.exit(0)
+
+    main(truncate=args.truncate)
