@@ -30,7 +30,20 @@ with pdfplumber.open(REPARTITION_PDF_PATH) as pdf:
 # Filter out Statkraft-owned farms (no longer managed)
 logger.info("Filtering out Statkraft-owned farms...")
 initial_count = len(df_repartition)
-df_repartition = df_repartition[df_repartition['Owner of WF'] != 'Statkraft']
+
+if 'Owner of WF' in df_repartition.columns:
+    # DEBUG: Print unique values to see what we are dealing with
+    unique_owners = df_repartition['Owner of WF'].unique()
+    logger.info(f"Unique owners found: {unique_owners}")
+    
+    # Forward fill 'Owner of WF' to handle merged cells in PDF
+    df_repartition['Owner of WF'] = df_repartition['Owner of WF'].replace('', pd.NA).ffill()
+    
+    # Normalize column data for filtering (strip whitespace and handle case)
+    df_repartition = df_repartition[~df_repartition['Owner of WF'].astype(str).str.strip().str.upper().eq('STATKRAFT')]
+else:
+    logger.warning("'Owner of WF' column not found! Skipping Statkraft filtering.")
+
 filtered_count = initial_count - len(df_repartition)
 logger.info(f"Filtered out {filtered_count} Statkraft-owned farms")
 
