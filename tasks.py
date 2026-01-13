@@ -342,6 +342,20 @@ def gh_deploy(c, force=False):
 ###########################
 
 @task
+def wipe_database(c):
+    """ETL Step 5: Wipe all data from Supabase database (OPTIONAL)"""
+    logger.warning("Wiping all Supabase data...")
+    c.run(f"python {Path('SCRIPTS/ETL') / '_05_wipe_database.py'}")
+    logger.success("Supabase data wiped!")
+
+# Alias for backwards compatibility
+@task
+def supabase_wipe(c):
+    """DEPRECATED: Use 'wipe-database' instead"""
+    logger.warning("Note: 'supabase-wipe' is deprecated, use 'wipe-database' instead")
+    wipe_database(c)
+
+@task
 def sql_to_db(c):
     """ETL Step 4: SQL to DB (Trigger GitHub Actions to setup database structure)"""
     logger.info("ETL STEP 4: SQL to DB (Setup database structure)")
@@ -349,12 +363,19 @@ def sql_to_db(c):
 
 @task
 def csv_to_db(c, truncate=False):
-    """ETL Step 5: CSV to DB (Load GOLD data to Supabase)"""
-    logger.info("ETL STEP 5: CSV to DB (Load data)")
-    cmd = f"python {Path('SCRIPTS/ETL') / '_05_csv_to_db.py'}"
+    """ETL Step 6: CSV to DB (Load GOLD data to Supabase)
+
+    Args:
+        truncate: If True, wipe all data first (Step 5) then load (Step 6)
+                  If False, just load with upsert (safe mode)
+    """
     if truncate:
-        cmd += " --truncate"
-    c.run(cmd)
+        logger.warning("Truncate mode: Wiping database first...")
+        wipe_database(c)
+        logger.info("")
+
+    logger.info("ETL STEP 6: CSV to DB (Load data)")
+    c.run(f"python {Path('SCRIPTS/ETL') / '_06_csv_to_db.py'}")
 
 @task(raw_to_bronze, bronze_to_silver, silver_to_gold)
 def etl_to_gold(c):

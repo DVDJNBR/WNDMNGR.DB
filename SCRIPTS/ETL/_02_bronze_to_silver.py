@@ -187,17 +187,17 @@ df_repartition = (
 # Create new columns
 df_repartition['farm_type'] = df_repartition['wf_abbreviation'].apply(lambda x: 'Solar' if x == 'ESM' else 'Wind')
 df_repartition['substitute_technical_manager'] = df_repartition['technical_manager_by_windfarm'].replace({
-    PERS_MMA: PERS_GCA,
-    PERS_GCA: PERS_MMA,
-    PERS_HOM: PERS_FRA,
-    PERS_FRA: PERS_HOM,
-    PERS_ADE: PERS_VCH,
-    PERS_VCH: PERS_ADE
+    PERS_MMA.title() if PERS_MMA else '': PERS_GCA.title() if PERS_GCA else '',
+    PERS_GCA.title() if PERS_GCA else '': PERS_MMA.title() if PERS_MMA else '',
+    PERS_HOM.title() if PERS_HOM else '': PERS_FRA.title() if PERS_FRA else '',
+    PERS_FRA.title() if PERS_FRA else '': PERS_HOM.title() if PERS_HOM else '',
+    PERS_ADE.title() if PERS_ADE else '': PERS_VCH.title() if PERS_VCH else '',
+    PERS_VCH.title() if PERS_VCH else '': PERS_ADE.title() if PERS_ADE else ''
 })
 df_repartition['substitute_key_account_manager'] = df_repartition['kam'].replace({
-    PERS_AVI: PERS_ALA,
-    PERS_ALA: PERS_AVI,
-    f'{PERS_ALA} + {PERS_LCH}': PERS_AVI
+    PERS_AVI.title() if PERS_AVI else '': PERS_ALA.title() if PERS_ALA else '',
+    PERS_ALA.title() if PERS_ALA else '': PERS_AVI.title() if PERS_AVI else '',
+    f'{PERS_ALA.title() if PERS_ALA else ""} + {PERS_LCH.title() if PERS_LCH else ""}': PERS_AVI.title() if PERS_AVI else ''
 })
 
 # Reorder columns
