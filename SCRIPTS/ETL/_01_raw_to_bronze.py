@@ -23,6 +23,10 @@ with pdfplumber.open(REPARTITION_PDF_PATH) as pdf:
     raw_tables = pdf.pages[0].extract_tables()
     df_repartition = pd.DataFrame(data=raw_tables[0][1:], columns=raw_tables[0][0])
 
+    # Clean column names (handle newlines from PDF wrapping)
+    df_repartition.columns = df_repartition.columns.str.replace('\n', ' ', regex=False).str.strip()
+    logger.info(f"Columns found: {df_repartition.columns.tolist()}")
+
 # Filter out Statkraft-owned farms (no longer managed)
 logger.info("Filtering out Statkraft-owned farms...")
 initial_count = len(df_repartition)
@@ -31,7 +35,7 @@ filtered_count = initial_count - len(df_repartition)
 logger.info(f"Filtered out {filtered_count} Statkraft-owned farms")
 
 # Get list of valid farm codes (excluding Statkraft)
-valid_farm_codes = df_repartition['WF abbreviation'].unique()
+valid_farm_codes = df_repartition['WF Abbreviation'].unique()
 
 df_repartition.to_csv(BRONZE_DIR / 'repartition_sheet.csv', index=False, encoding='utf-8-sig')
 logger.success("Repartition sheet exported to BRONZE")
