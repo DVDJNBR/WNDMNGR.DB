@@ -2,7 +2,44 @@
 
 
 
+## v2.0.0 (2026-01-13)
+
+### Breaking
+
+* fix: restructure ETL to fix truncate mode and FK constraint issues
+
+BREAKING CHANGE: ETL numbering changed
+- Renamed: _05_csv_to_db.py -&gt; _06_csv_to_db.py
+- New: _05_wipe_database.py (extracted from truncate logic)
+
+Fixes:
+- Fix FK constraint violations during truncate mode
+- Fix farm_turbine_details wipe (use wind_farm_uuid instead of farm_uuid)
+- Remove truncate logic from _06_csv_to_db.py (now always upsert)
+- Skip missing CSV files without error (employees, etc.)
+
+Changes:
+- invoke csv-to-db: safe upsert mode
+- invoke csv-to-db --truncate: wipe first (Step 5), then load (Step 6)
+- invoke wipe-database: explicit wipe command
+- Add tmpclaude-* to .gitignore
+
+Cleanup:
+- Remove obsolete Supabase functions
+- Remove temporary SQL scripts
+
+Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`ff28747`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/ff28747422f6514f5c6a6511476b8851d50b82b1))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/DVDJNBR/WNDMNGR.DB ([`c9bf271`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/c9bf2714aa15eebd3886c6c36628d437835b28fe))
+
+
 ## v1.7.2 (2025-12-17)
+
+### Chore
+
+* chore(release): 1.7.2 [skip ci] ([`3b2b1ed`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/3b2b1ed37203da4bf425017f74767ac0d67f438e))
 
 ### Fix
 
