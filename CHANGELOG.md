@@ -2,6 +2,24 @@
 
 
 
+## v2.1.0 (2026-01-13)
+
+### Feature
+
+* feat: major ETL improvements and data filtering
+
+- Filter Statkraft-owned farms at source (_01_raw_to_bronze.py)
+- Remove &#39;+ Louis Chenel&#39; from KAM columns (_02_bronze_to_silver.py)
+- Force add PERS_LCH to persons list for Head of Technical Management role (_03_silver_to_gold.py)
+- Fix boolean values (1/0 -&gt; True/False) for has_remit_subscription and ice detection systems
+- Add SQLite local database support for WNDMNGR.APP (_06_csv_to_db.py)
+- Improve console output with colored success/warning/failed summary
+- Fix table load order (substations before wind_turbine_generators)
+- Apply same improvements to wipe database script (_05_wipe_database.py)
+
+Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`9e989ac`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/9e989ac6d9b15ff764e92c27a89347d275957d87))
+
+
 ## v2.0.0 (2026-01-13)
 
 ### Breaking
@@ -29,6 +47,10 @@ Cleanup:
 - Remove temporary SQL scripts
 
 Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt; ([`ff28747`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/ff28747422f6514f5c6a6511476b8851d50b82b1))
+
+### Chore
+
+* chore(release): 2.0.0 [skip ci] ([`4c3ed71`](https://github.com/DVDJNBR/WNDMNGR.DB/commit/4c3ed715a2d64159efeb7441c48a422d3084c60e))
 
 ### Unknown
 
