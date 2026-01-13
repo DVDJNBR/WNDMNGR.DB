@@ -137,6 +137,11 @@ all_persons_list = list(persons_exploded) + legal_rep_persons + database_persons
 df_persons = pd.DataFrame({'full_name': all_persons_list})
 df_persons = df_persons[df_persons['full_name'] != ''].drop_duplicates().reset_index(drop=True)
 
+# Force add PERS_LCH (Head of Technical Management) if not already in list
+if PERS_LCH and PERS_LCH not in df_persons['full_name'].values:
+    df_persons = pd.concat([df_persons, pd.DataFrame({'full_name': [PERS_LCH]})], ignore_index=True)
+    logger.info(f"Added {PERS_LCH} to persons list (from .env)")
+
 # Step 3: Split first_name / last_name with particle detection
 particles = ['le', 'la', 'de', 'du', 'el', 'van', 'von', 'mc', 'mac']  # lowercase for case-insensitive matching
 def split_name(full_name):
@@ -589,9 +594,9 @@ for _, row in df_database.iterrows():
     farm_uuid = farm_lookup.get(farm_code)
 
     if farm_uuid:
-        # Map remit_subscription: "Yes" variants → 1 (True), else None
+        # Map remit_subscription: "Yes" variants → True (boolean), else None
         remit_value = row['remit_subscription']
-        has_remit = 1 if pd.notna(remit_value) and 'yes' in str(remit_value).lower() else None
+        has_remit = True if pd.notna(remit_value) and 'yes' in str(remit_value).lower() else None
 
         # Convert SIRET to string (remove .0 if it's a float)
         siret_value = ''
@@ -967,10 +972,10 @@ for ice_str in ice_systems_set:
         name = ice_str.split('(')[0].strip()
         flags = ice_str.split('(')[1].split(')')[0]  # Get "YES ; NO" part
 
-        # Parse YES/NO flags
+        # Parse YES/NO flags (boolean)
         parts = [p.strip().upper() for p in flags.split(';')]
-        automatic_stop = 1 if len(parts) > 0 and parts[0] == 'YES' else 0
-        automatic_restart = 1 if len(parts) > 1 and parts[1] == 'YES' else 0
+        automatic_stop = True if len(parts) > 0 and parts[0] == 'YES' else False
+        automatic_restart = True if len(parts) > 1 and parts[1] == 'YES' else False
 
         ice_systems_list.append({
             'uuid': str(uuid.uuid4()),

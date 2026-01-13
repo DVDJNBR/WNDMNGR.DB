@@ -1,6 +1,10 @@
 """
-ETL STEP 6: Load data from GOLD layer to Supabase database via API
+ETL STEP 6: Load data from GOLD layer to databases
 Part of ETL pipeline: LOAD step (CSV → DB)
+
+Loads data into:
+1. Supabase (cloud database)
+2. SQLite local database (WNDMNGR.APP)
 
 This script always uses UPSERT mode (safe).
 To wipe data first, run _05_wipe_database.py before this script,
@@ -16,6 +20,7 @@ from loguru import logger
 import ssl
 import urllib3
 import httpx
+import sqlite3
 
 # Disable SSL warnings for corporate proxy
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -27,6 +32,10 @@ load_dotenv()
 # Paths
 BASE_DIR = Path(__file__).parent.parent.parent
 GOLD_DIR = BASE_DIR / 'DATA' / 'GOLD'
+
+# Local SQLite database for WNDMNGR.APP
+WNDMNGR_APP_DIR = BASE_DIR.parent / 'WNDMNGR.APP'
+SQLITE_DB_PATH = WNDMNGR_APP_DIR / 'DATA' / 'windmanager.db'
 
 # Supabase credentials
 SUPABASE_URL = os.getenv('SUPABASE_URL')
@@ -65,9 +74,11 @@ LOAD_ORDER = [
     # Farms (no dependencies)
     ('farms', 'farms.csv'),
 
-    # WTG and Substations (depend on farms)
-    ('wind_turbine_generators', 'wind_turbine_generators.csv'),
+    # Substations (depend on farms) - MUST be loaded before WTG
     ('substations', 'substations.csv'),
+
+    # WTG (depend on farms and substations)
+    ('wind_turbine_generators', 'wind_turbine_generators.csv'),
 
     # Employees (depend on companies and persons)
     ('employees', 'employees.csv'),
@@ -121,15 +132,18 @@ DELETE_KEYS = {
 
 
 def load_table(table_name: str, csv_file: str):
-    """Load a CSV file into a Supabase table"""
+    """Load a CSV file into a Supabase table
+
+    Returns: 'success', 'warning', or 'failed'
+    """
 
     csv_path = GOLD_DIR / csv_file
 
     if not csv_path.exists():
         logger.warning(f"  ⊘ {table_name}: File not found ({csv_file}), skipping")
-        return True  # Not an error, just no data to load
+        return 'warning'
 
-    logger.info(f"Loading {table_name}...")
+    logger.info(f"Loading {table_name} to Supabase...")
 
     try:
         # Read CSV
@@ -137,11 +151,21 @@ def load_table(table_name: str, csv_file: str):
 
         if df.empty:
             logger.warning(f"  → Empty file, skipping")
-            return True
+            return 'warning'
 
         # Replace Inf/-Inf and NaN with None (for proper NULL handling and JSON compliance)
         import numpy as np
         df = df.replace([np.inf, -np.inf, np.nan], None)
+
+        # Convert 1.0/0.0 to boolean for specific boolean columns
+        boolean_columns = {
+            'farm_administrations': ['has_remit_subscription'],
+            'ice_detection_systems': ['automatic_stop', 'automatic_restart']
+        }
+        if table_name in boolean_columns:
+            for col in boolean_columns[table_name]:
+                if col in df.columns:
+                    df[col] = df[col].apply(lambda x: True if x == 1.0 or x == 1 else (False if x == 0.0 or x == 0 else None))
 
         # Convert to dict records
         records = df.to_dict('records')
@@ -163,39 +187,119 @@ def load_table(table_name: str, csv_file: str):
                 logger.error(f"  → Batch error: {str(e)[:200]}")
                 # Continue with next batch
 
-        logger.success(f"  ✓ {table_name}: {total_inserted} rows loaded")
-        return True
+        logger.success(f"  ✓ {table_name}: {total_inserted} rows loaded to Supabase")
+        return 'success'
 
     except Exception as e:
         logger.error(f"  ✗ Error loading {table_name}: {str(e)[:200]}")
-        return False
+        return 'failed'
+
+
+def load_table_sqlite(table_name: str, csv_file: str, conn: sqlite3.Connection):
+    """Load a CSV file into a SQLite table (local WNDMNGR.APP database)
+
+    Returns: 'success', 'warning', or 'failed'
+    """
+
+    csv_path = GOLD_DIR / csv_file
+
+    if not csv_path.exists():
+        return 'warning'  # Already logged warning in load_table()
+
+    try:
+        # Read CSV
+        df = pd.read_csv(csv_path)
+
+        if df.empty:
+            return 'warning'
+
+        # Replace Inf/-Inf and NaN with None
+        import numpy as np
+        df = df.replace([np.inf, -np.inf, np.nan], None)
+
+        # Load to SQLite (replace existing data)
+        df.to_sql(table_name, conn, if_exists='replace', index=False)
+
+        logger.success(f"  ✓ {table_name}: {len(df)} rows loaded to SQLite")
+        return 'success'
+
+    except Exception as e:
+        logger.error(f"  ✗ Error loading {table_name} to SQLite: {str(e)[:200]}")
+        return 'failed'
 
 
 def main():
-    """Load all GOLD data to Supabase (UPSERT mode)"""
+    """Load all GOLD data to Supabase and SQLite"""
+
+    # Configure logger to force colors
+    logger.remove()
+    logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
 
     logger.info("=" * 80)
-    logger.info("ETL STEP 6: CSV → DB (Load GOLD data to Supabase)")
+    logger.info("ETL STEP 6: CSV → DB (Load GOLD data to databases)")
     logger.info("=" * 80)
+    logger.info("Targets:")
+    logger.info("  1. Supabase (cloud)")
+    logger.info(f"  2. SQLite local ({SQLITE_DB_PATH})")
+    logger.info("")
     logger.info("Mode: UPSERT (safe - updates existing, inserts new)")
     logger.info(f"Tables to load: {len(LOAD_ORDER)}")
     logger.info("")
 
+    # Connect to SQLite
+    sqlite_conn = None
+    if SQLITE_DB_PATH.exists():
+        try:
+            sqlite_conn = sqlite3.connect(SQLITE_DB_PATH)
+            logger.info(f"✓ Connected to SQLite: {SQLITE_DB_PATH}")
+        except Exception as e:
+            logger.warning(f"Could not connect to SQLite: {str(e)[:200]}")
+    else:
+        logger.warning(f"SQLite database not found: {SQLITE_DB_PATH}")
+
+    logger.info("")
+
     success_count = 0
+    warning_count = 0
     failed_count = 0
 
     for table_name, csv_file in LOAD_ORDER:
-        if load_table(table_name, csv_file):
-            success_count += 1
-        else:
+        # Load to Supabase
+        supabase_status = load_table(table_name, csv_file)
+
+        # Load to SQLite (if connected)
+        sqlite_status = 'success'
+        if sqlite_conn:
+            sqlite_status = load_table_sqlite(table_name, csv_file, sqlite_conn)
+
+        # Count worst status (failed > warning > success)
+        if supabase_status == 'failed' or sqlite_status == 'failed':
             failed_count += 1
+        elif supabase_status == 'warning' or sqlite_status == 'warning':
+            warning_count += 1
+        else:
+            success_count += 1
+
+    # Close SQLite connection
+    if sqlite_conn:
+        sqlite_conn.commit()
+        sqlite_conn.close()
+        logger.info("")
+        logger.info("✓ SQLite connection closed")
 
     logger.info("")
     logger.info("=" * 80)
     logger.info("LOAD COMPLETE")
     logger.info("=" * 80)
-    logger.info(f"✓ Success: {success_count}/{len(LOAD_ORDER)}")
-    logger.info(f"✗ Failed: {failed_count}/{len(LOAD_ORDER)}")
+
+    # Display summary with colors
+    if success_count > 0:
+        logger.success(f"✓ Success: {success_count}/{len(LOAD_ORDER)}")
+    if warning_count > 0:
+        logger.warning(f"⚠ Warning: {warning_count}/{len(LOAD_ORDER)} (empty/missing tables)")
+    if failed_count > 0:
+        logger.error(f"✗ Failed: {failed_count}/{len(LOAD_ORDER)}")
+
     logger.info("=" * 80)
 
     if failed_count > 0:

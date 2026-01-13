@@ -51,8 +51,8 @@ LOAD_ORDER = [
     ('persons', 'persons.csv'),
     ('ice_detection_systems', 'ice_detection_systems.csv'),
     ('farms', 'farms.csv'),
-    ('wind_turbine_generators', 'wind_turbine_generators.csv'),
     ('substations', 'substations.csv'),
+    ('wind_turbine_generators', 'wind_turbine_generators.csv'),
     ('employees', 'employees.csv'),
     ('farm_company_roles', 'farm_company_roles.csv'),
     ('farm_referents', 'farm_referents.csv'),
@@ -102,6 +102,11 @@ DELETE_KEYS = {
 
 def wipe_data():
     """Wipe all data from Supabase in reverse dependency order"""
+
+    # Configure logger to force colors
+    logger.remove()
+    logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
+
     logger.warning("=" * 80)
     logger.warning("ETL STEP 5: WIPE DATABASE")
     logger.warning("=" * 80)
@@ -112,6 +117,7 @@ def wipe_data():
     wipe_order = reversed(LOAD_ORDER)
 
     success_count = 0
+    warning_count = 0
     failed_count = 0
 
     for table_name, _ in wipe_order:
@@ -134,15 +140,28 @@ def wipe_data():
             success_count += 1
 
         except Exception as e:
-            logger.error(f"  ✗ Failed to wipe {table_name}: {str(e)[:150]}")
-            failed_count += 1
+            error_msg = str(e)
+            # Check if it's a "table doesn't exist" warning vs a real error
+            if 'does not exist' in error_msg.lower() or 'relation' in error_msg.lower():
+                logger.warning(f"  ⊘ {table_name}: Table doesn't exist (skipping)")
+                warning_count += 1
+            else:
+                logger.error(f"  ✗ Failed to wipe {table_name}: {error_msg[:150]}")
+                failed_count += 1
 
     logger.info("")
     logger.warning("=" * 80)
     logger.warning("WIPE COMPLETE")
     logger.warning("=" * 80)
-    logger.info(f"✓ Success: {success_count}/{len(LOAD_ORDER)}")
-    logger.info(f"✗ Failed: {failed_count}/{len(LOAD_ORDER)}")
+
+    # Display summary with colors
+    if success_count > 0:
+        logger.success(f"✓ Success: {success_count}/{len(LOAD_ORDER)}")
+    if warning_count > 0:
+        logger.warning(f"⚠ Warning: {warning_count}/{len(LOAD_ORDER)} (tables don't exist)")
+    if failed_count > 0:
+        logger.error(f"✗ Failed: {failed_count}/{len(LOAD_ORDER)}")
+
     logger.warning("=" * 80)
 
     if failed_count > 0:

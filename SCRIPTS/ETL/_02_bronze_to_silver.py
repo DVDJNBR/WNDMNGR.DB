@@ -184,6 +184,9 @@ df_repartition = (
     )
 )
 
+# Remove "+ Louis Chenel" from KAM (keep only principal KAM)
+df_repartition['kam'] = df_repartition['kam'].apply(lambda x: str(x).split('+')[0].strip() if '+' in str(x) else x)
+
 # Create new columns
 df_repartition['farm_type'] = df_repartition['wf_abbreviation'].apply(lambda x: 'Solar' if x == 'ESM' else 'Wind')
 df_repartition['substitute_technical_manager'] = df_repartition['technical_manager_by_windfarm'].replace({
@@ -196,8 +199,7 @@ df_repartition['substitute_technical_manager'] = df_repartition['technical_manag
 })
 df_repartition['substitute_key_account_manager'] = df_repartition['kam'].replace({
     PERS_AVI.title() if PERS_AVI else '': PERS_ALA.title() if PERS_ALA else '',
-    PERS_ALA.title() if PERS_ALA else '': PERS_AVI.title() if PERS_AVI else '',
-    f'{PERS_ALA.title() if PERS_ALA else ""} + {PERS_LCH.title() if PERS_LCH else ""}': PERS_AVI.title() if PERS_AVI else ''
+    PERS_ALA.title() if PERS_ALA else '': PERS_AVI.title() if PERS_AVI else ''
 })
 
 # Reorder columns

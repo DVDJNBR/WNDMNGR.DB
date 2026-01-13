@@ -221,7 +221,7 @@ SCRIPTS/TESTS/DATA/*
 
 # Validation notebooks (local testing only)
 validate_*.ipynb
-test_*.ipynb
+# test_*.ipynb
 
 # Temporary test files with secrets
 GITHUB_SECRETS_SETUP.md
